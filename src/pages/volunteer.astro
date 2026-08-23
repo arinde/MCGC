@@ -156,7 +156,7 @@ const { days, title, year } = convention;
       };
 
       submit.disabled = true;
-      submit.textContent = "Sending…";
+      submit.dataset.loading = "true";
       note.textContent = DEFAULT_NOTE;
       note.classList.remove("is-error");
 
@@ -193,7 +193,7 @@ const { days, title, year } = convention;
         note.classList.add("is-error");
       } finally {
         submit.disabled = false;
-        submit.textContent = "Sign me up";
+        delete submit.dataset.loading;
       }
     });
   }

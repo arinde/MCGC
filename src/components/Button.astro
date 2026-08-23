@@ -37,7 +37,8 @@ const externalAttrs = external ? { target: "_blank", rel: "noopener noreferrer" 
     </a>
   ) : (
     <button type={type} id={id} class={classes}>
-      <slot />
+      <span class="btn__label"><slot /></span>
+      <span class="btn__spinner" aria-hidden="true"></span>
     </button>
   )
 }
@@ -97,5 +98,50 @@ const externalAttrs = external ? { target: "_blank", rel: "noopener noreferrer" 
   .btn[disabled] {
     opacity: 0.55;
     cursor: not-allowed;
+  }
+
+  /**
+   * Loading state. The label stays in place and keeps its width, so the button
+   * doesn't jump or resize mid-submit — it just dims and gains a spinner.
+   * Driven by `data-loading` so any script can set it without knowing our CSS.
+   */
+  .btn__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .btn__spinner {
+    display: none;
+    width: 15px;
+    height: 15px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: btn-spin 0.6s linear infinite;
+  }
+
+  .btn[data-loading="true"] {
+    cursor: progress;
+  }
+
+  .btn[data-loading="true"] .btn__label {
+    opacity: 0.55;
+  }
+
+  .btn[data-loading="true"] .btn__spinner {
+    display: block;
+  }
+
+  @keyframes btn-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn__spinner {
+      animation-duration: 1.8s;
+    }
   }
 </style>

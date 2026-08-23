@@ -26,12 +26,12 @@ function turnoutState(turnout: number | null): string {
   <h2 class="panel__title">Night by night</h2>
 
   <div class="table-scroll">
-    <table>
+    <table class="data-table">
       <thead>
         <tr>
           <th scope="col">Night</th>
-          <th scope="col">Registered</th>
-          <th scope="col">Attended</th>
+          <th scope="col" class="num">Registered</th>
+          <th scope="col" class="num">Attended</th>
           <th scope="col">Turnout</th>
           <th scope="col" class="col-bar"><span class="sr-only">Comparison</span></th>
         </tr>
@@ -41,20 +41,20 @@ function turnoutState(turnout: number | null): string {
           days.map((day) => (
             <tr>
               <th scope="row">{day.label}</th>
-              <td>
+              <td data-label="Registered" class="num">
                 {day.registeredPeople}
-                <small>{day.registeredParties} bookings</small>
+                <span class="sub">{day.registeredParties} bookings</span>
               </td>
-              <td>
+              <td data-label="Attended" class="num">
                 {day.attendedPeople || "—"}
-                {day.attendedParties > 0 && <small>{day.attendedParties} checked in</small>}
+                {day.attendedParties > 0 && <span class="sub">{day.attendedParties} checked in</span>}
               </td>
-              <td>
+              <td data-label="Turnout">
                 <span class:list={["pill", `pill--${turnoutState(day.turnout)}`]}>
                   {turnoutLabel(day.turnout)}
                 </span>
               </td>
-              <td class="col-bar">
+              <td class="col-bar" data-label="Comparison">
                 <span class="bar bar--registered" style={`width:${(day.registeredPeople / peak) * 100}%`} />
                 <span class="bar bar--attended" style={`width:${(day.attendedPeople / peak) * 100}%`} />
               </td>
@@ -84,66 +84,6 @@ function turnoutState(turnout: number | null): string {
     font-size: 1.2rem;
     font-weight: 900;
     margin: 0 0 18px;
-  }
-
-  .table-scroll {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-  }
-
-  th,
-  td {
-    text-align: left;
-    padding: 12px 14px 12px 0;
-    border-bottom: 1px solid var(--rule);
-    vertical-align: top;
-  }
-
-  thead th {
-    position: sticky;
-    top: 56px;
-    background: var(--color-surface);
-    z-index: 1;
-    font-size: 0.64rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    border-bottom-color: var(--rule-strong);
-  }
-
-  tbody th {
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  td {
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    text-align: right;
-  }
-
-  td.col-bar {
-    text-align: left;
-  }
-
-  thead th:not(:first-child):not(.col-bar) {
-    text-align: right;
-  }
-
-  td small {
-    display: block;
-    font-weight: 500;
-    font-size: 0.74rem;
-    color: var(--text-muted);
-    margin-top: 2px;
   }
 
   .pill {

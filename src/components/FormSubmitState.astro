@@ -1,0 +1,32 @@
+---
+/**
+ * Gives every form's submit button a loading state, without each form having
+ * to implement one.
+ *
+ * Native POSTs (login, headcounts) navigate away, so the state simply persists
+ * until the new page renders — which is exactly the feedback wanted on a slow
+ * connection. Forms that submit via fetch clear it themselves in a `finally`.
+ */
+---
+
+<script>
+  document.addEventListener(
+    "submit",
+    (event) => {
+      const form = event.target as HTMLFormElement;
+      if (!(form instanceof HTMLFormElement) || form.dataset.noLoading === "true") return;
+
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"], button:not([type])');
+      if (!button || button.dataset.loading === "true") return;
+
+      button.dataset.loading = "true";
+
+      // A form that fails validation never leaves the page; don't strand the
+      // button spinning forever.
+      setTimeout(() => {
+        if (!form.checkValidity()) delete button.dataset.loading;
+      }, 0);
+    },
+    true,
+  );
+</script>

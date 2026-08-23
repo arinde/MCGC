@@ -122,18 +122,29 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
       history.length === 0 ? (
         <p class="empty">No counts recorded yet.</p>
       ) : (
-        <ul class="history">
-          {history.map((entry) => (
-            <li>
-              <span class="history__count">{entry.headcount}</span>
-              <span>
-                <strong>{entry.session_name ?? entry.session_time}</strong>
-                <em>{entry.day_label} · {entry.session_time}</em>
-              </span>
-              <time>{timeFormat.format(new Date(entry.counted_at))}</time>
-            </li>
-          ))}
-        </ul>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Session</th>
+              <th scope="col">Night</th>
+              <th scope="col" class="num">Counted</th>
+              <th scope="col">Recorded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((entry) => (
+              <tr>
+                <th scope="row">
+                  {entry.session_name ?? entry.session_time}
+                  <span class="sub">{entry.session_time}</span>
+                </th>
+                <td data-label="Night">{entry.day_label}</td>
+                <td data-label="Counted" class="num">{entry.headcount}</td>
+                <td data-label="Recorded">{timeFormat.format(new Date(entry.counted_at))}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )
     }
   </div>
@@ -164,7 +175,7 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
 
   .count-form {
     display: grid;
-    gap: 16px;
+    gap: var(--space-4);
     background: var(--surface);
     border: 1px solid var(--rule);
     border-radius: var(--radius-md);
@@ -213,49 +224,6 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     font-size: 1.2rem;
     font-weight: 900;
     margin: 0 0 18px;
-  }
-
-  .history {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 2px;
-  }
-
-  .history li {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 16px;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .history__count {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 1.5rem;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
-    min-width: 2.5ch;
-  }
-
-  .history strong {
-    display: block;
-    font-size: 0.95rem;
-  }
-
-  .history em {
-    font-style: normal;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-
-  .history time {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    white-space: nowrap;
   }
 
   .empty {

@@ -275,9 +275,10 @@ if (ready) {
 
   .results :global(.result) {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: var(--space-3);
     background: var(--surface);
     border: 1px solid var(--rule);
     border-radius: var(--radius-md);
@@ -307,6 +308,8 @@ if (ready) {
   }
 
   .results :global(.result__btn) {
+    flex: 1 0 auto;
+    min-height: 48px;
     background: var(--accent);
     color: var(--surface-deep);
     border: 0;

@@ -79,14 +79,22 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
               {data.branches.length === 0 ? (
                 <p class="empty">No registrations yet.</p>
               ) : (
-                <ul class="branches">
-                  {data.branches.map((branch) => (
-                    <li>
-                      <span class="branches__name">{branch.branch}</span>
-                      <span class="branches__count">{branch.people}</span>
-                    </li>
-                  ))}
-                </ul>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Branch</th>
+                      <th scope="col" class="num">People</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.branches.map((branch) => (
+                      <tr>
+                        <th scope="row">{branch.branch}</th>
+                        <td data-label="People" class="num">{branch.people}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
@@ -107,13 +115,13 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
               <p class="empty">Nothing yet — the first registration will appear here.</p>
             ) : (
               <div class="table-scroll">
-                <table>
+                <table class="data-table">
                   <thead>
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Phone</th>
                       <th scope="col">Branch</th>
-                      <th scope="col">Party</th>
+                      <th scope="col" class="num">Party</th>
                       <th scope="col">Nights</th>
                       <th scope="col">Code</th>
                       <th scope="col">When</th>
@@ -125,15 +133,17 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
                         <th scope="row">
                           {registration.name}
                           {registration.flags.length > 0 && (
-                            <small>{registration.flags.join(" · ")}</small>
+                            <span class="sub flags">{registration.flags.join(" · ")}</span>
                           )}
                         </th>
-                        <td>{registration.phone}</td>
-                        <td>{registration.branch ?? "—"}</td>
-                        <td>{registration.party_size}</td>
-                        <td>{registration.days.join(", ") || "—"}</td>
-                        <td><code>{registration.code}</code></td>
-                        <td>{timeFormat.format(new Date(registration.created_at))}</td>
+                        <td data-label="Phone">
+                          <a href={`tel:${registration.phone}`}>{registration.phone}</a>
+                        </td>
+                        <td data-label="Branch">{registration.branch ?? "—"}</td>
+                        <td data-label="Party" class="num">{registration.party_size}</td>
+                        <td data-label="Nights">{registration.days.join(", ") || "—"}</td>
+                        <td data-label="Code"><code>{registration.code}</code></td>
+                        <td data-label="When">{timeFormat.format(new Date(registration.created_at))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -221,8 +231,15 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     background: var(--surface);
     border: 1px solid var(--rule);
     border-radius: var(--radius-md);
-    padding: 22px;
-    margin-bottom: 22px;
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  @media (min-width: 760px) {
+    .panel {
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
   }
 
   .panel__head {
@@ -267,86 +284,19 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     color: var(--accent);
   }
 
+  /* The registrations table has seven columns and will never fit a phone.
+     Scroll it, and fade the right edge so it's obvious there is more. */
   .table-scroll {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    mask-image: linear-gradient(to right, #000 92%, transparent 100%);
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-  }
-
-  th,
-  td {
-    text-align: left;
-    padding: 11px 14px 11px 0;
-    border-bottom: 1px solid var(--rule);
-    white-space: nowrap;
-  }
-
-  thead th {
-    position: sticky;
-    top: 56px;
-    background: var(--color-surface);
-    z-index: 1;
-    font-size: 0.64rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    border-bottom-color: var(--rule-strong);
-  }
-
-  tbody th {
-    font-weight: 700;
-    color: var(--text);
-    white-space: normal;
-  }
-
-  tbody th small {
-    display: block;
-    font-weight: 500;
-    font-size: 0.72rem;
-    color: var(--accent);
-    margin-top: 2px;
-  }
-
-  td {
-    color: var(--text-muted);
-  }
-
-  code {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-  }
-
-  .branches {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 2px;
-  }
-
-  .branches li {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--rule);
-    font-size: 0.9rem;
-  }
-
-  .branches__name {
-    color: var(--text);
-  }
-
-  .branches__count {
-    color: var(--accent);
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
+  @media (min-width: 900px) {
+    .table-scroll {
+      mask-image: none;
+    }
   }
 
   .activity {
@@ -359,7 +309,8 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
 
   .activity li {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
+    row-gap: var(--space-1);
     gap: 12px;
     align-items: center;
     padding: 10px 0;
@@ -394,8 +345,19 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
 
   .activity time {
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     white-space: nowrap;
+    grid-column: 2;
+  }
+
+  @media (min-width: 640px) {
+    .activity li {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .activity time {
+      grid-column: auto;
+    }
   }
 
   .empty {

@@ -92,14 +92,12 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
             <p>
               <b>No volunteers yet{teamFilter !== "all" ? ` for ${teamName(teamFilter)}` : ""}.</b>
             </p>
-            <p>
-              Share the sign-up page and they’ll appear here as they come in.
-            </p>
+            <p>Share the sign-up page and they’ll appear here as they come in.</p>
             <a class="empty-state__link" href="/volunteer">Open the sign-up page →</a>
           </div>
         ) : (
           <div class="table-scroll">
-            <table>
+            <table class="data-table">
               <thead>
                 <tr>
                   <th scope="col">Name</th>
@@ -115,21 +113,25 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
                   <tr>
                     <th scope="row">
                       {volunteer.name}
-                      {volunteer.experience && <small>{volunteer.experience}</small>}
+                      {volunteer.experience && <span class="sub">{volunteer.experience}</span>}
                     </th>
-                    <td>
+                    <td data-label="Phone">
                       <a href={`tel:${volunteer.phone}`}>{volunteer.phone}</a>
                     </td>
-                    <td>
+                    <td data-label="Teams">
                       <span class="tags">
                         {volunteer.teams.map((team) => (
                           <span class="tag">{teamName(team)}</span>
                         ))}
                       </span>
                     </td>
-                    <td>{volunteer.days.length ? volunteer.days.join(", ") : "Any"}</td>
-                    <td>{volunteer.branch ?? "—"}</td>
-                    <td>{dateFormat.format(new Date(volunteer.created_at))}</td>
+                    <td data-label="Days">
+                      {volunteer.days.length === 7
+                        ? "All 7 days"
+                        : volunteer.days.join(", ") || "Any"}
+                    </td>
+                    <td data-label="Branch">{volunteer.branch ?? "—"}</td>
+                    <td data-label="Signed up">{dateFormat.format(new Date(volunteer.created_at))}</td>
                   </tr>
                 ))}
               </tbody>
@@ -205,61 +207,8 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
     color: var(--on-accent);
   }
 
-  .table-scroll {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-  }
-
-  th,
-  td {
-    text-align: left;
-    padding: var(--space-3) var(--space-4) var(--space-3) 0;
-    border-bottom: 1px solid var(--color-line);
-    white-space: nowrap;
-  }
-
-  thead th {
-    position: sticky;
-    top: 56px;
-    background: var(--color-canvas);
-    z-index: 1;
-    font-size: var(--text-xs);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-ink-mute);
-  }
-
-  tbody th {
-    font-weight: 700;
-    color: var(--color-ink);
-    white-space: normal;
-  }
-
-  tbody th small {
-    display: block;
-    font-weight: 400;
-    font-size: var(--text-xs);
-    color: var(--color-ink-mute);
-    margin-top: 2px;
-  }
-
-  td {
-    color: var(--color-ink-mute);
-  }
-
-  td a {
-    color: var(--color-info);
-    text-decoration: none;
-  }
-
   .tags {
-    display: inline-flex;
+    display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
   }
@@ -271,6 +220,7 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", {
     border: 1px solid var(--color-line);
     border-radius: var(--radius-sm);
     color: var(--color-ink);
+    white-space: nowrap;
   }
 
   .empty-state {

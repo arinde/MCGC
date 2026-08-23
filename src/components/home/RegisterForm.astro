@@ -150,7 +150,7 @@ const noteOptions = [
       };
 
       submit.disabled = true;
-      submit.textContent = "Sending…";
+      submit.dataset.loading = "true";
       setNote(DEFAULT_NOTE, false);
 
       try {
@@ -179,7 +179,7 @@ const noteOptions = [
         );
       } finally {
         submit.disabled = false;
-        submit.textContent = "Send my registration";
+        delete submit.dataset.loading;
       }
     });
   }
