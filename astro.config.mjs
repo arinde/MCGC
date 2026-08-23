@@ -14,7 +14,11 @@ export default defineConfig({
   // The dashboard and the registration API opt out with `export const prerender = false`.
   output: "static",
 
-  adapter: vercel(),
+  adapter: vercel({
+    webAnalytics: {
+      enabled: true,
+    },
+  }),
 
   integrations: [sitemap()],
 
