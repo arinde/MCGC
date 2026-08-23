@@ -1,0 +1,180 @@
+---
+import { Image } from "astro:assets";
+
+import biolaTayo from "../../assets/flyers/biola-tayo.jpeg";
+import mobolajiJohn from "../../assets/flyers/mobolaji-john.jpeg";
+import oluwafemiSimeon from "../../assets/flyers/oluwafemi-simeon.jpeg";
+import segunPeculiar from "../../assets/flyers/segun-peculiar.jpeg";
+import ariyoBest from "../../assets/flyers/ariyo-best.jpeg";
+
+/**
+ * The official convention flyers, one per guest artiste. These are the images
+ * the church is already sharing on WhatsApp, so people recognise them — that
+ * familiarity is the point. Served through astro:assets so the 260KB JPEGs
+ * ship as much smaller WebP.
+ */
+const flyers = [
+  { image: biolaTayo, name: "Min. Biola Tayo" },
+  { image: mobolajiJohn, name: "Min. Mobolaji John (Authority)" },
+  { image: oluwafemiSimeon, name: "Min. Oluwafemi Simeon" },
+  { image: segunPeculiar, name: "Min. Segun Peculiar" },
+  { image: ariyoBest, name: "Min. Ariyo Best" },
+];
+---
+
+<section class="band" id="flyers">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">The flyers</p>
+      <h2 class="display">Save one. Share one.</h2>
+      <p class="lede">
+        Tap any flyer to open it full size, then save it and send it on. Each one carries a
+        different guest artiste ministering at the convention.
+      </p>
+    </div>
+
+    <ul class="flyers rv">
+      {
+        flyers.map(({ image, name }, index) => (
+          <li>
+            <button type="button" class="flyer" data-index={index} aria-label={`View the ${name} flyer full size`}>
+              <Image
+                src={image}
+                alt={`Majiyagbe Convention 2026 flyer — ${name}`}
+                widths={[280, 560]}
+                sizes="(min-width: 900px) 280px, (min-width: 560px) 45vw, 88vw"
+                loading="lazy"
+                class="flyer__image"
+              />
+              <span class="flyer__name">{name}</span>
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<dialog class="lightbox" id="flyer-lightbox">
+  <button type="button" class="lightbox__close" id="lightbox-close" aria-label="Close">&times;</button>
+  <img id="lightbox-image" alt="" />
+</dialog>
+
+<script>
+  const dialog = document.getElementById("flyer-lightbox") as HTMLDialogElement | null;
+  const image = document.getElementById("lightbox-image") as HTMLImageElement | null;
+  const close = document.getElementById("lightbox-close");
+
+  if (dialog && image && close) {
+    document.querySelectorAll<HTMLButtonElement>(".flyer").forEach((button) => {
+      button.addEventListener("click", () => {
+        const source = button.querySelector("img");
+        if (!source) return;
+
+        // Use the largest candidate the browser knows about, so the lightbox
+        // isn't a blown-up thumbnail.
+        image.src = source.currentSrc || source.src;
+        image.alt = source.alt;
+        dialog.showModal();
+      });
+    });
+
+    close.addEventListener("click", () => dialog.close());
+
+    // Clicking the backdrop closes too — the dialog element itself is the backdrop.
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+</script>
+
+<style>
+  .flyers {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  }
+
+  .flyer {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    overflow: hidden;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    transition:
+      border-color var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease);
+  }
+
+  .flyer:hover,
+  .flyer:focus-visible {
+    border-color: var(--accent-deep);
+    transform: translateY(-2px);
+  }
+
+  .flyer__image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .flyer__name {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+    border-top: 1px solid var(--rule);
+  }
+
+  .lightbox {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    max-width: min(94vw, 640px);
+    max-height: 94dvh;
+    overflow: visible;
+  }
+
+  .lightbox::backdrop {
+    background: rgb(11 13 26 / 0.92);
+  }
+
+  .lightbox img {
+    width: 100%;
+    height: auto;
+    max-height: 90dvh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+  }
+
+  .lightbox__close {
+    position: absolute;
+    top: calc(var(--space-4) * -1);
+    right: 0;
+    transform: translateY(-100%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .lightbox__close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>

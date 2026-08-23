@@ -1,0 +1,78 @@
+---
+import { Image } from "astro:assets";
+import logo from "../assets/mcgc-logo.jpeg";
+import { convention } from "../data/convention";
+
+interface Props {
+  href?: string;
+  size?: "sm" | "md";
+  /** Hide the wordmark on tight bars where the roundel alone is enough. */
+  compact?: boolean;
+}
+
+const { href = "#top", size = "sm", compact = false } = Astro.props;
+const px = size === "md" ? 52 : 38;
+---
+
+<a class:list={["brand", compact && "brand--compact"]} href={href}>
+  <Image
+    src={logo}
+    alt=""
+    width={px}
+    height={px}
+    densities={[1, 2]}
+    loading="eager"
+    class="brand__logo"
+  />
+  <span class="brand__text">
+    <b>{convention.church}</b>
+    <small>{convention.churchSuffix}</small>
+  </span>
+  <span class="sr-only">{convention.church} — home</span>
+</a>
+
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: var(--text);
+    min-height: 44px;
+  }
+
+  .brand__logo {
+    border-radius: 50%;
+    flex: 0 0 auto;
+    object-fit: cover;
+  }
+
+  .brand__text {
+    display: none;
+    line-height: 1.15;
+  }
+
+  .brand__text b {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .brand__text small {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .brand--compact .brand__text {
+    display: none;
+  }
+
+  @media (min-width: 560px) {
+    .brand:not(.brand--compact) .brand__text {
+      display: block;
+    }
+  }
+</style>

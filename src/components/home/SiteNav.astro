@@ -1,9 +1,10 @@
 ---
 import Button from "../Button.astro";
+import Brand from "../Brand.astro";
 
 const links = [
-  { href: "#about", label: "The Convention" },
   { href: "#schedule", label: "Schedule" },
+  { href: "#checklist", label: "What to bring" },
   { href: "#ministers", label: "Ministering" },
   { href: "#venue", label: "Venue" },
 ];
@@ -11,7 +12,7 @@ const links = [
 
 <nav class="nav" id="nav" aria-label="Main">
   <div class="wrap nav__inner">
-    <a class="mark" href="#top">MC<span>G</span>C</a>
+    <Brand href="#top" />
 
     <ul class="nav__links">
       {
@@ -23,7 +24,7 @@ const links = [
       }
     </ul>
 
-    <Button href="#register" size="sm" class="nav__cta">Register free</Button>
+    <Button href="#register" size="sm" class="nav__cta">Register</Button>
   </div>
 </nav>
 
@@ -43,7 +44,7 @@ const links = [
     position: sticky;
     top: 0;
     z-index: 60;
-    background: rgba(11, 13, 26, 0.78);
+    background: rgb(11 13 26 / 0.82);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid transparent;
@@ -51,7 +52,7 @@ const links = [
   }
 
   .nav.is-stuck {
-    border-bottom-color: var(--line-soft);
+    border-bottom-color: var(--rule);
   }
 
   .nav__inner {
@@ -68,13 +69,13 @@ const links = [
     font-weight: 900;
     font-size: 1.12rem;
     letter-spacing: 0.04em;
-    color: var(--halo);
+    color: var(--text);
     text-decoration: none;
     flex: 0 0 auto;
   }
 
   .mark span {
-    color: var(--gold);
+    color: var(--accent);
   }
 
   .nav__links {
@@ -86,7 +87,7 @@ const links = [
   }
 
   .nav__links a {
-    color: var(--dim);
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.86rem;
     font-weight: 600;
@@ -95,7 +96,7 @@ const links = [
   }
 
   .nav__links a:hover {
-    color: var(--halo);
+    color: var(--text);
   }
 
   .nav :global(.nav__cta) {

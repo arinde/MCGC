@@ -102,8 +102,8 @@ const { days } = convention;
   .tab {
     flex: 0 0 auto;
     background: transparent;
-    border: 1px solid var(--line);
-    color: var(--dim);
+    border: 1px solid var(--rule-strong);
+    color: var(--text-muted);
     padding: 11px 18px;
     border-radius: 999px;
     cursor: pointer;
@@ -118,13 +118,13 @@ const { days } = convention;
   }
 
   .tab:hover {
-    color: var(--halo);
-    border-color: var(--dimmer);
+    color: var(--text);
+    border-color: var(--text-muted);
   }
 
   .tab[aria-selected="true"] {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: var(--on-gold);
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--surface-deep);
   }
 </style>

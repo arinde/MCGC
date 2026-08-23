@@ -18,15 +18,15 @@ const { label, value, detail, feature = false } = Astro.props;
 
 <style>
   .tile {
-    background: var(--ink-2);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
     padding: 20px;
   }
 
   .tile--feature {
-    border-color: var(--gold-deep);
-    background: rgba(232, 180, 74, 0.06);
+    border-color: var(--accent-deep);
+    background: rgb(232 180 74 / 0.07);
   }
 
   .tile__label {
@@ -34,12 +34,12 @@ const { label, value, detail, feature = false } = Astro.props;
     font-weight: 800;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--dimmer);
+    color: var(--text-muted);
     margin: 0 0 10px;
   }
 
   .tile--feature .tile__label {
-    color: var(--gold);
+    color: var(--accent);
   }
 
   .tile__value {
@@ -48,13 +48,13 @@ const { label, value, detail, feature = false } = Astro.props;
     font-size: 2.4rem;
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    color: var(--halo);
+    color: var(--text);
     margin: 0;
   }
 
   .tile__detail {
     font-size: 0.82rem;
-    color: var(--dim);
+    color: var(--text-muted);
     margin: 8px 0 0;
   }
 </style>

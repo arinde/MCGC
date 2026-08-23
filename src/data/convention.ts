@@ -36,6 +36,24 @@ export type Minister = {
   photo?: string;
 };
 
+/**
+ * Ministering at the convention. Explicitly typed (not `satisfies`) so that the
+ * optional `photo` stays part of the type even while no entry sets it yet.
+ */
+const ministers: Minister[] = [
+  {
+    name: "Prophet N.G. Bolarinde JP",
+    role: "Convener",
+    org: "General Overseer · aka Baba Majiyagbe",
+    slots: "Throughout the convention",
+  },
+  { name: "Min. Biola Tayo", role: "Guest Artiste", slots: "Ministering" },
+  { name: "Min. Mobolaji John", role: "Guest Artiste", org: "Authority", slots: "Ministering" },
+  { name: "Min. Oluwafemi Simeon", role: "Guest Artiste", slots: "Ministering" },
+  { name: "Min. Segun Peculiar", role: "Guest Artiste", slots: "Ministering" },
+  { name: "Min. Ariyo Best", role: "Guest Artiste", slots: "Ministering" },
+];
+
 export const convention = {
   // ---------- identity ----------
   church: "Mercy of Christ Gospel Church",
@@ -151,20 +169,42 @@ export const convention = {
   ] satisfies Day[],
 
   // ---------- ministering ----------
-  ministers: [
-    {
-      name: "Prophet N.G. Bolarinde JP",
-      role: "Convener",
-      org: "General Overseer · aka Baba Majiyagbe",
-      slots: "Throughout the convention",
-    },
-    { name: "Min. Biola Tayo", role: "Guest Artiste", slots: "Ministering" },
-    { name: "Min. Mobolaji John", role: "Guest Artiste", org: "Authority", slots: "Ministering" },
-    { name: "Min. Oluwafemi Simeon", role: "Guest Artiste", slots: "Ministering" },
-    { name: "Min. Segun Peculiar", role: "Guest Artiste", slots: "Ministering" },
-    { name: "Min. Ariyo Best", role: "Guest Artiste", slots: "Ministering" },
-  ] satisfies Minister[],
+  ministers,
 };
+
+/**
+ * What to bring to camp. Seven days is a long stay, so this is grouped the way
+ * people actually pack rather than by importance.
+ * 🔴 Confirm with the camp coordinator — especially bedding and feeding.
+ */
+export const campChecklist = [
+  {
+    group: "Bedding & rest",
+    items: ["Mat or mattress", "Bedsheet and pillow", "Blanket or wrapper", "Mosquito net", "Insect repellent"],
+  },
+  {
+    group: "Clothing",
+    items: [
+      "Service clothes for seven days",
+      "Something warm for the night",
+      "Comfortable slippers and shoes",
+      "Head covering",
+      "Raincoat or umbrella",
+    ],
+  },
+  {
+    group: "Washing & personal",
+    items: ["Towel and sponge", "Soap, toothbrush and paste", "Bucket", "Personal medication", "Tissue and hand sanitiser"],
+  },
+  {
+    group: "For the services",
+    items: ["Your Bible", "Notebook and biro", "Hymn book", "Offering and seed", "Torch or lantern"],
+  },
+  {
+    group: "Practical",
+    items: ["Phone and charger", "Power bank", "Water bottle", "Plate, cup and spoon", "Small padlock for your bag"],
+  },
+] as const;
 
 export type Convention = typeof convention;
 

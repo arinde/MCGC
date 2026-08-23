@@ -73,9 +73,9 @@ function turnoutState(turnout: number | null): string {
 
 <style>
   .panel {
-    background: var(--ink-2);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
     padding: 22px;
   }
 
@@ -100,7 +100,7 @@ function turnoutState(turnout: number | null): string {
   td {
     text-align: left;
     padding: 12px 14px 12px 0;
-    border-bottom: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--rule);
     vertical-align: top;
   }
 
@@ -109,18 +109,18 @@ function turnoutState(turnout: number | null): string {
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--dimmer);
-    border-bottom-color: var(--line);
+    color: var(--text-muted);
+    border-bottom-color: var(--rule-strong);
   }
 
   tbody th {
     font-weight: 700;
-    color: var(--halo);
+    color: var(--text);
     white-space: nowrap;
   }
 
   td {
-    color: var(--halo);
+    color: var(--text);
     font-variant-numeric: tabular-nums;
     font-weight: 700;
   }
@@ -129,7 +129,7 @@ function turnoutState(turnout: number | null): string {
     display: block;
     font-weight: 500;
     font-size: 0.74rem;
-    color: var(--dimmer);
+    color: var(--text-muted);
     margin-top: 2px;
   }
 
@@ -143,23 +143,23 @@ function turnoutState(turnout: number | null): string {
   }
 
   .pill--good {
-    color: var(--good);
-    border-color: var(--good);
+    color: var(--color-success);
+    border-color: var(--color-success);
   }
 
   .pill--warn {
-    color: var(--warn);
-    border-color: var(--gold-deep);
+    color: var(--color-warning);
+    border-color: var(--accent-deep);
   }
 
   .pill--bad {
-    color: var(--bad);
-    border-color: var(--bad);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
   }
 
   .pill--none {
-    color: var(--dimmer);
-    border-color: var(--line);
+    color: var(--text-muted);
+    border-color: var(--rule-strong);
   }
 
   .col-bar {
@@ -175,12 +175,12 @@ function turnoutState(turnout: number | null): string {
   }
 
   .bar--registered {
-    background: var(--gold-deep);
+    background: var(--accent-deep);
     margin-bottom: 4px;
   }
 
   .bar--attended {
-    background: var(--gold);
+    background: var(--accent);
   }
 
   .legend {
@@ -188,7 +188,7 @@ function turnoutState(turnout: number | null): string {
     align-items: center;
     gap: 8px;
     font-size: 0.76rem;
-    color: var(--dimmer);
+    color: var(--text-muted);
     margin: 16px 0 0;
   }
 
@@ -200,11 +200,11 @@ function turnoutState(turnout: number | null): string {
   }
 
   .key--registered {
-    background: var(--gold-deep);
+    background: var(--accent-deep);
   }
 
   .key--attended {
-    background: var(--gold);
+    background: var(--accent);
     margin-left: 10px;
   }
 </style>

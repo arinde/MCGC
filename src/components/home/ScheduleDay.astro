@@ -53,7 +53,7 @@ const { day, index, selected } = Astro.props;
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--accent);
   }
 
   .sessions {
@@ -66,19 +66,19 @@ const { day, index, selected } = Astro.props;
     display: grid;
     gap: 4px 22px;
     padding: 20px 0;
-    border-top: 1px solid var(--line-soft);
+    border-top: 1px solid var(--rule);
     grid-template-columns: 1fr;
   }
 
   .sessions li:last-child {
-    border-bottom: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--rule);
   }
 
   .session__time {
     font-size: 0.82rem;
     font-weight: 800;
     letter-spacing: 0.06em;
-    color: var(--gold);
+    color: var(--accent);
     font-variant-numeric: tabular-nums;
     padding-top: 3px;
   }
@@ -91,7 +91,7 @@ const { day, index, selected } = Astro.props;
 
   .session__who {
     font-size: 0.88rem;
-    color: var(--dim);
+    color: var(--text-muted);
     margin: 2px 0 0;
   }
 
@@ -102,8 +102,8 @@ const { day, index, selected } = Astro.props;
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--gold);
-    border: 1px solid var(--gold-deep);
+    color: var(--accent);
+    border: 1px solid var(--accent-deep);
     padding: 3px 9px;
     border-radius: 999px;
   }

@@ -2,7 +2,6 @@
 import Admin from "../../layouts/Admin.astro";
 import StatTile from "../../components/admin/StatTile.astro";
 import DayTable from "../../components/admin/DayTable.astro";
-import Button from "../../components/Button.astro";
 import { loadDashboard, type DashboardData } from "../../lib/stats";
 import { isConfigured } from "../../lib/supabase";
 
@@ -200,7 +199,7 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
 
   .page-head__meta {
     font-size: 0.8rem;
-    color: var(--dimmer);
+    color: var(--text-muted);
     margin: 0;
   }
 
@@ -218,9 +217,9 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
   }
 
   .panel {
-    background: var(--ink-2);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
     padding: 22px;
     margin-bottom: 22px;
   }
@@ -254,17 +253,17 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
   .export {
     font-size: 0.74rem;
     font-weight: 700;
-    color: var(--dim);
+    color: var(--text-muted);
     text-decoration: none;
-    border: 1px solid var(--line);
+    border: 1px solid var(--rule-strong);
     padding: 6px 12px;
     border-radius: 999px;
     transition: border-color 0.2s, color 0.2s;
   }
 
   .export:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .table-scroll {
@@ -281,7 +280,7 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
   td {
     text-align: left;
     padding: 11px 14px 11px 0;
-    border-bottom: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--rule);
     white-space: nowrap;
   }
 
@@ -290,13 +289,13 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     font-weight: 800;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--dimmer);
-    border-bottom-color: var(--line);
+    color: var(--text-muted);
+    border-bottom-color: var(--rule-strong);
   }
 
   tbody th {
     font-weight: 700;
-    color: var(--halo);
+    color: var(--text);
     white-space: normal;
   }
 
@@ -304,17 +303,17 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     display: block;
     font-weight: 500;
     font-size: 0.72rem;
-    color: var(--gold);
+    color: var(--accent);
     margin-top: 2px;
   }
 
   td {
-    color: var(--dim);
+    color: var(--text-muted);
   }
 
   code {
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    color: var(--gold);
+    color: var(--accent);
     letter-spacing: 0.08em;
   }
 
@@ -331,16 +330,16 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     justify-content: space-between;
     gap: 12px;
     padding: 10px 0;
-    border-bottom: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--rule);
     font-size: 0.9rem;
   }
 
   .branches__name {
-    color: var(--halo);
+    color: var(--text);
   }
 
   .branches__count {
-    color: var(--gold);
+    color: var(--accent);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
   }
@@ -359,7 +358,7 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     gap: 12px;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--rule);
     font-size: 0.86rem;
   }
 
@@ -368,42 +367,42 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    border: 1px solid var(--line);
-    color: var(--dimmer);
+    border: 1px solid var(--rule-strong);
+    color: var(--text-muted);
     padding: 3px 8px;
     border-radius: 999px;
   }
 
   .activity__kind--registration {
-    color: var(--gold);
-    border-color: var(--gold-deep);
+    color: var(--accent);
+    border-color: var(--accent-deep);
   }
 
   .activity__kind--checkin {
-    color: var(--good);
-    border-color: var(--good);
+    color: var(--color-success);
+    border-color: var(--color-success);
   }
 
   .activity__text {
-    color: var(--halo);
+    color: var(--text);
   }
 
   .activity time {
-    color: var(--dimmer);
+    color: var(--text-muted);
     font-size: 0.78rem;
     white-space: nowrap;
   }
 
   .empty {
-    color: var(--dimmer);
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin: 0;
   }
 
   .notice {
-    background: var(--ink-2);
-    border: 1px solid var(--gold-deep);
-    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--accent-deep);
+    border-radius: var(--radius-md);
     padding: 30px;
     max-width: 60ch;
   }
@@ -414,13 +413,13 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
   }
 
   .notice p {
-    color: var(--dim);
+    color: var(--text-muted);
     margin: 0 0 8px;
   }
 
   .notice__hint {
     font-size: 0.86rem;
-    color: var(--dimmer) !important;
+    color: var(--text-muted) !important;
   }
 
   @media (min-width: 900px) {

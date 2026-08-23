@@ -1,0 +1,256 @@
+---
+import { campChecklist } from "../../data/convention";
+
+/**
+ * What to bring to camp, revealed one line at a time as the section scrolls
+ * into view — so people actually read the list instead of skimming past it.
+ *
+ * Ticks persist in localStorage: someone packing on Sunday night can close the
+ * page and come back to it. Per-viewer only; nothing is sent anywhere.
+ */
+---
+
+<section class="band checklist-band" id="checklist">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">Before you come</p>
+      <h2 class="display">What to bring to camp.</h2>
+      <p class="lede">
+        Seven days is a long stay. Tick these off as you pack &mdash; the page remembers where you
+        got to.
+      </p>
+    </div>
+
+    <div class="checklist" id="checklist-items">
+      {
+        campChecklist.map((group) => (
+          <section class="group">
+            <h3 class="group__title">{group.group}</h3>
+            <ul class="items">
+              {group.items.map((item) => (
+                <li class="item" data-item={item}>
+                  <label>
+                    <input type="checkbox" value={item} />
+                    <span class="item__box" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    </span>
+                    <span class="item__text">{item}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+
+    <p class="checklist__note" id="checklist-progress" role="status"></p>
+  </div>
+</section>
+
+<script>
+  const STORAGE_KEY = "majiyagbe-checklist";
+  const root = document.getElementById("checklist-items");
+  const progress = document.getElementById("checklist-progress");
+
+  if (root && progress) {
+    const items = Array.from(root.querySelectorAll<HTMLElement>(".item"));
+    const boxes = Array.from(root.querySelectorAll<HTMLInputElement>("input[type=checkbox]"));
+
+    // ---- restore previous ticks ----
+    const load = (): string[] => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+      } catch {
+        return [];
+      }
+    };
+
+    const save = (values: string[]) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+      } catch {
+        /* private mode — ticking still works for this visit */
+      }
+    };
+
+    const packed = new Set(load());
+    boxes.forEach((box) => {
+      if (packed.has(box.value)) {
+        box.checked = true;
+        box.closest(".item")?.classList.add("is-packed");
+      }
+    });
+
+    const updateProgress = () => {
+      const done = boxes.filter((box) => box.checked).length;
+      progress.textContent =
+        done === 0
+          ? `${boxes.length} things to pack.`
+          : done === boxes.length
+            ? "Everything packed. See you at Ori Oke Majiyagbe."
+            : `${done} of ${boxes.length} packed.`;
+    };
+
+    root.addEventListener("change", (event) => {
+      const box = event.target as HTMLInputElement;
+      if (box.type !== "checkbox") return;
+
+      box.closest(".item")?.classList.toggle("is-packed", box.checked);
+      box.checked ? packed.add(box.value) : packed.delete(box.value);
+      save([...packed]);
+      updateProgress();
+    });
+
+    updateProgress();
+
+    // ---- reveal one line at a time ----
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion) {
+      items.forEach((item) => item.classList.add("is-shown"));
+    } else {
+      items.forEach((item) => item.classList.add("is-hidden"));
+
+      const observer = new IntersectionObserver(
+        (entries, self) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            self.disconnect();
+
+            // Stagger across the whole list once it comes into view.
+            items.forEach((item, index) => {
+              setTimeout(() => {
+                item.classList.remove("is-hidden");
+                item.classList.add("is-shown");
+              }, index * 90);
+            });
+          }
+        },
+        { threshold: 0.15 },
+      );
+
+      observer.observe(root);
+    }
+  }
+</script>
+
+<style>
+  .checklist {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .group__title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0 0 var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .item {
+    transition:
+      opacity var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease);
+  }
+
+  .item.is-hidden {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  .item.is-shown {
+    opacity: 1;
+    transform: none;
+  }
+
+  .item label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    align-items: center;
+    /* 44px touch target, per the quality floor. */
+    min-height: 44px;
+    padding: var(--space-2) 0;
+    cursor: pointer;
+  }
+
+  .item input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .item__box {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-sm);
+    display: grid;
+    place-items: center;
+    color: var(--on-accent);
+    transition:
+      background var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease);
+  }
+
+  .item__box svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  .item input:checked + .item__box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .item input:checked + .item__box svg {
+    opacity: 1;
+  }
+
+  .item input:focus-visible + .item__box {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .item__text {
+    font-size: var(--text-base);
+    color: var(--text);
+  }
+
+  .item.is-packed .item__text {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent-deep);
+  }
+
+  .checklist__note {
+    margin: var(--space-8) 0 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  @media (min-width: 720px) {
+    .checklist {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8) var(--space-12);
+    }
+  }
+</style>

@@ -1,5 +1,6 @@
 ---
 import { convention } from "../../data/convention";
+import Brand from "../Brand.astro";
 
 const { church, title, year, theme, datesLabel, venue, contact } = convention;
 const shareText = `${title} ${year} — ${theme.join(" ")}. ${datesLabel}, ${venue.name}. `;
@@ -9,7 +10,7 @@ const shareText = `${title} ${year} — ${theme.join(" ")}. ${datesLabel}, ${ven
   <div class="wrap">
     <div class="footer__grid">
       <div>
-        <a class="mark" href="#top">MC<span>G</span>C</a>
+        <Brand href="#top" size="md" />
         <p class="footer__blurb">
           The annual convention of {church}. Everyone is welcome &mdash; come as you are.
         </p>
@@ -64,8 +65,8 @@ const shareText = `${title} ${year} — ${theme.join(" ")}. ${datesLabel}, ${ven
 
 <style>
   .footer {
-    border-top: 1px solid var(--line-soft);
-    background: var(--ink-2);
+    border-top: 1px solid var(--rule);
+    background: var(--surface);
     padding-block: 52px 40px;
   }
 
@@ -79,21 +80,21 @@ const shareText = `${title} ${year} — ${theme.join(" ")}. ${datesLabel}, ${ven
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--accent);
     margin: 0 0 14px;
   }
 
   .footer p,
   .footer a:not(.mark) {
     font-size: 0.9rem;
-    color: var(--dim);
+    color: var(--text-muted);
     text-decoration: none;
     margin: 0 0 8px;
     display: block;
   }
 
   .footer a:not(.mark):hover {
-    color: var(--halo);
+    color: var(--text);
   }
 
   .mark {
@@ -102,25 +103,25 @@ const shareText = `${title} ${year} — ${theme.join(" ")}. ${datesLabel}, ${ven
     font-weight: 900;
     font-size: 1.12rem;
     letter-spacing: 0.04em;
-    color: var(--halo);
+    color: var(--text);
     text-decoration: none;
     margin-bottom: 14px;
   }
 
   .mark span {
-    color: var(--gold);
+    color: var(--accent);
   }
 
   .footer__colophon {
     margin-top: 40px;
     padding-top: 22px;
-    border-top: 1px solid var(--line-soft);
+    border-top: 1px solid var(--rule);
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     justify-content: space-between;
     font-size: 0.78rem;
-    color: var(--dimmer);
+    color: var(--text-muted);
   }
 
   @media (min-width: 760px) {

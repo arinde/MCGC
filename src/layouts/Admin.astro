@@ -47,8 +47,8 @@ const tabs = [
 
 <style>
   .admin-bar {
-    background: var(--ink-2);
-    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    border-bottom: 1px solid var(--rule-strong);
     position: sticky;
     top: 0;
     z-index: 40;
@@ -65,13 +65,13 @@ const tabs = [
   .admin-bar__mark {
     font-family: var(--font-display);
     font-weight: 900;
-    color: var(--halo);
+    color: var(--text);
     text-decoration: none;
     letter-spacing: 0.04em;
   }
 
   .admin-bar__mark span {
-    color: var(--gold);
+    color: var(--accent);
   }
 
   .admin-bar__mark small {
@@ -80,7 +80,7 @@ const tabs = [
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--dimmer);
+    color: var(--text-muted);
     margin-left: 6px;
   }
 
@@ -91,7 +91,7 @@ const tabs = [
   }
 
   .admin-bar__tabs a {
-    color: var(--dim);
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.85rem;
     font-weight: 700;
@@ -103,18 +103,18 @@ const tabs = [
   }
 
   .admin-bar__tabs a:hover {
-    color: var(--halo);
+    color: var(--text);
   }
 
   .admin-bar__tabs a[aria-current="page"] {
-    background: var(--gold);
-    color: var(--on-gold);
+    background: var(--accent);
+    color: var(--surface-deep);
   }
 
   .admin-bar__logout button {
     background: none;
-    border: 1px solid var(--line);
-    color: var(--dim);
+    border: 1px solid var(--rule-strong);
+    color: var(--text-muted);
     font-family: inherit;
     font-size: 0.8rem;
     font-weight: 700;
@@ -125,8 +125,8 @@ const tabs = [
   }
 
   .admin-bar__logout button:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .admin-main {

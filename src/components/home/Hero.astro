@@ -1,39 +1,43 @@
 ---
 import { convention } from "../../data/convention";
 import Button from "../Button.astro";
-import Countdown from "./Countdown.astro";
-import DustMotes from "./DustMotes.astro";
 
-const { title, year, theme, tagline, verse, verseRef } = convention;
+const { title, year, theme, verse, verseRef, datesLabel, venue } = convention;
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue.maps)}`;
 ---
 
 <header class="hero" id="top">
-  <div class="hero__shafts" aria-hidden="true">
-    <i></i><i></i><i></i>
-  </div>
-
-  <DustMotes />
+  <!-- The one light source on the page: the flyer's portal of daylight
+       breaking through oxblood. Nothing else on the site glows. -->
+  <div class="hero__bloom" aria-hidden="true"></div>
 
   <div class="wrap hero__inner">
-    <p class="eyebrow rv">{title} · {year}</p>
+    <p class="eyebrow">{title} · {year}</p>
 
-    <h1 class="display hero__title rv">
-      {theme.map((word, i) => <>{i > 0 && <br />}{word}</>)}
-      <em>{tagline}</em>
-    </h1>
-
-    <blockquote class="verse rv">
-      &ldquo;{verse}&rdquo;
-      <cite>{verseRef}</cite>
-    </blockquote>
-
-    <div class="hero__cta rv">
-      <Button href="#register">Register free</Button>
-      <Button href="#schedule" variant="ghost">See the schedule</Button>
+    <div class="hero__lockup">
+      <p class="hero__theme-label">Theme</p>
+      <h1 class="display hero__theme">
+        {theme.map((line, index) => <>{index > 0 && <br />}{line}</>)}
+      </h1>
+      <p class="hero__ref">{verseRef}</p>
     </div>
 
-    <div class="rv">
-      <Countdown />
+    <blockquote class="hero__verse">&ldquo;{verse}&rdquo;</blockquote>
+
+    <dl class="hero__when">
+      <div>
+        <dt>When</dt>
+        <dd>{datesLabel}</dd>
+      </div>
+      <div>
+        <dt>Where</dt>
+        <dd>{venue.name}<span>{venue.address}</span></dd>
+      </div>
+    </dl>
+
+    <div class="hero__actions">
+      <Button href={mapsUrl} external>Get directions</Button>
+      <Button href="#schedule" variant="ghost">See the schedule</Button>
     </div>
   </div>
 </header>
@@ -42,126 +46,122 @@ const { title, year, theme, tagline, verse, verseRef } = convention;
   .hero {
     position: relative;
     overflow: hidden;
-    padding-block: clamp(56px, 11vw, 110px) clamp(48px, 8vw, 88px);
+    background: var(--surface);
+    padding-block: var(--space-12) var(--space-16);
   }
 
-  /* Ambient halo behind the headline. */
-  .hero::after {
-    content: "";
+  .hero__bloom {
     position: absolute;
     left: 50%;
-    top: -30%;
+    top: -14%;
     transform: translateX(-50%);
-    width: min(1000px, 140vw);
+    width: min(940px, 150vw);
     aspect-ratio: 1;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(232, 180, 74, 0.13), transparent 62%);
+    background: radial-gradient(
+      circle at 50% 45%,
+      var(--glow-cool-pale) 0%,
+      var(--glow-cool) 16%,
+      var(--glow-warm) 42%,
+      transparent 68%
+    );
+    opacity: 0.34;
+    filter: blur(12px);
     pointer-events: none;
   }
 
   .hero__inner {
     position: relative;
-    z-index: 2;
+    z-index: 1;
   }
 
-  .hero .eyebrow {
-    margin-bottom: 20px;
+  /* The arch: echoes the portal and a church window. Used here and on the
+     minister portraits — nowhere else. */
+  .hero__lockup {
+    margin: var(--space-6) 0 var(--space-8);
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-arch);
+    background: linear-gradient(to bottom, rgb(11 13 26 / 0.6), rgb(11 13 26 / 0.15));
+    text-align: center;
+    max-width: 34rem;
   }
 
-  .hero__title {
-    font-size: var(--step-4);
-  }
-
-  .hero__title em {
-    display: block;
-    font-style: italic;
-    font-weight: 400;
-    font-size: 0.42em;
-    letter-spacing: 0.01em;
-    color: var(--gold);
-    margin-top: 0.28em;
-  }
-
-  .verse {
-    margin: 26px 0 0;
-    padding-left: 16px;
-    border-left: 2px solid var(--gold-deep);
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: clamp(1rem, 2.4vw, 1.22rem);
-    color: var(--halo);
-    max-width: 46ch;
-    line-height: 1.5;
-  }
-
-  .verse cite {
-    display: block;
-    font-style: normal;
+  .hero__theme-label {
     font-family: var(--font-body);
-    font-size: 0.74rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-3);
+  }
+
+  .hero__theme {
+    font-size: var(--text-3xl);
+    color: var(--accent);
+    font-variation-settings: "SOFT" 40, "WONK" 1;
+  }
+
+  .hero__ref {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: var(--space-4) 0 0;
+  }
+
+  .hero__verse {
+    margin: 0 0 var(--space-8);
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--accent-deep);
+    font-size: var(--text-base);
+    color: var(--text);
+    max-width: var(--measure);
+  }
+
+  .hero__when {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0 0 var(--space-8);
+  }
+
+  .hero__when dt {
+    font-size: var(--text-xs);
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--dimmer);
-    margin-top: 10px;
+    color: var(--accent);
+    margin-bottom: var(--space-2);
   }
 
-  .hero__cta {
+  .hero__when dd {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+  }
+
+  .hero__when dd span {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: var(--space-1);
+    max-width: 38ch;
+  }
+
+  .hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 34px;
+    gap: var(--space-3);
   }
 
-  /* ---- light shafts ---- */
-
-  .hero__shafts {
-    position: absolute;
-    inset: -20% -10% auto -10%;
-    height: 130%;
-    pointer-events: none;
-    opacity: 0.55;
-  }
-
-  .hero__shafts i {
-    position: absolute;
-    top: -30%;
-    width: 34vw;
-    height: 170%;
-    background: linear-gradient(
-      to bottom,
-      rgba(232, 180, 74, 0.16),
-      rgba(232, 180, 74, 0.04) 42%,
-      transparent 72%
-    );
-    transform-origin: top center;
-    filter: blur(22px);
-    animation: sway 14s ease-in-out infinite alternate;
-  }
-
-  .hero__shafts i:nth-child(1) {
-    left: 2%;
-    animation-delay: -2s;
-  }
-
-  .hero__shafts i:nth-child(2) {
-    left: 34%;
-    opacity: 0.7;
-    animation-delay: -6s;
-  }
-
-  .hero__shafts i:nth-child(3) {
-    left: 66%;
-    opacity: 0.5;
-    animation-delay: -9s;
-  }
-
-  @keyframes sway {
-    from {
-      transform: rotate(9deg) translateX(-1.5vw);
-    }
-    to {
-      transform: rotate(15deg) translateX(1.5vw);
+  @media (min-width: 720px) {
+    .hero__when {
+      grid-template-columns: auto 1fr;
+      gap: var(--space-12);
     }
   }
 </style>

@@ -1,54 +1,88 @@
 /**
- * Design tokens — the single source of truth for colour, type and spacing.
- * Components reference these. No component may contain a raw hex value.
+ * Brand tokens — SINGLE SOURCE OF TRUTH.
+ * Never write a raw hex in a component; if a value is missing, add it here first.
  *
- * The site commits to one visual world (a lit auditorium at night) rather than
- * following the viewer's light/dark preference, so every value is painted
- * explicitly and there is no light-theme override.
+ * Names are semantic, not colour-literal (`--surface`, not `--oxblood`), so
+ * changing the palette is a values-only edit — no component has to be touched.
+ *
+ * Current palette: night blue + candlelight gold, taken from the convention's
+ * evening services. Chosen over the flyer's oxblood at the client's request.
  */
 
 :root {
-  /* ---- ground ---- */
-  --ink: #0b0d1a;
-  --ink-2: #101426;
-  --ink-3: #171c33;
+  /* ---- Public site: night ground ---- */
+  --surface-deep: #0b0d1a; /* page floor, footer */
+  --surface: #101426; /* primary dark surface, cards */
+  --surface-raised: #171c33; /* inputs, insets */
 
-  /* ---- lines ---- */
-  --line: #242b49;
-  --line-soft: #1b2039;
+  /* ---- Accent: candlelight gold ---- */
+  --accent: #e8b44a; /* headings, eyebrows, CTA fill */
+  --accent-bright: #f7d693; /* hover, gradient top */
+  --accent-deep: #8c6520; /* borders, gradient bottom */
+  --on-accent: #221703; /* text on a gold fill */
 
-  /* ---- accent: candlelight ---- */
-  --gold: #e8b44a;
-  --gold-bright: #f7d693;
-  --gold-deep: #8c6520;
-  --on-gold: #221703;
+  /* ---- The one light source (hero bloom only) ---- */
+  --glow-warm: #e8b44a;
+  --glow-cool: #4a63b8;
+  --glow-cool-pale: #9fb0e8;
 
-  /* ---- text ---- */
-  --halo: #f3eada;
-  --dim: #99a1bd;
-  --dimmer: #6e7699;
+  /* ---- Text on dark ---- */
+  --text: #f3eada;
+  --text-muted: #99a1bd;
 
-  /* ---- semantic (dashboard only) ---- */
-  --good: #4ec9a0;
-  --warn: #e8b44a;
-  --bad: #e86a5a;
+  /* ---- Hairline rules on dark surfaces ---- */
+  --rule: rgb(140 101 32 / 0.22);
+  --rule-strong: rgb(140 101 32 / 0.45);
 
-  /* ---- type ---- */
-  --font-display: "Bodoni Moda", Georgia, "Times New Roman", serif;
-  --font-body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* ---- Dashboard (light surface) ---- */
+  --color-ink: #16130f;
+  --color-ink-mute: #5c554c;
+  --color-line: #e4dfd7;
+  --color-surface: #ffffff;
+  --color-canvas: #faf7f2;
 
-  --step--1: 0.82rem;
-  --step-0: 1rem;
-  --step-1: 1.25rem;
-  --step-2: clamp(1.5rem, 3vw, 2rem);
-  --step-3: clamp(2rem, 5.6vw, 3.3rem);
-  --step-4: clamp(3.1rem, 13.5vw, 8.6rem);
+  /* ---- Semantic — dashboard only, always paired with a text label ---- */
+  --color-success: #0f7b4f;
+  --color-warning: #b26a00;
+  --color-danger: #c0362c;
+  --color-info: #1f6feb;
 
-  /* ---- space & shape ---- */
-  --gutter: 22px;
-  --measure: 1140px;
-  --radius: 16px;
-  --radius-sm: 10px;
+  /* ---- Type ---- */
+  --font-display: "Fraunces", Georgia, serif; /* headings only */
+  --font-body: "Figtree", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
-  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.5rem, 2vw + 1rem, 1.95rem);
+  --text-2xl: clamp(1.95rem, 3vw + 1rem, 2.44rem);
+  --text-3xl: clamp(2.4rem, 5vw + 1rem, 3.82rem);
+
+  /* ---- Spacing — 4px base ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-arch: 999px 999px 8px 8px; /* the arch motif — hero + portraits only */
+
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.3);
+  --shadow-glow: 0 0 48px rgb(232 180 74 / 0.28);
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur-base: 240ms;
+
+  --measure: 66ch;
+  --container: 1180px;
+  --container-narrow: 720px;
 }
