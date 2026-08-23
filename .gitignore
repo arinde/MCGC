@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # Local Netlify folder
 .netlify
+
+# Vercel build output — MUST stay ignored. Astro inlines environment values
+# into this bundle at build time, so committing it publishes your secrets.
+.vercel
