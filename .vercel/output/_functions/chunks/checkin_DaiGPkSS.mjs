@@ -3,7 +3,7 @@ import { D as maybeRenderHead, E as renderTemplate, I as createAstro, b as rende
 import { t as createComponent } from "./compiler_CQKGis8q.mjs";
 import { t as renderScript } from "./script_BbaWhd6Z.mjs";
 import { a as convention, n as isConfigured, o as currentDayLabel, t as getSupabase } from "./supabase_DnnZyzMy.mjs";
-import { t as $$Admin } from "./Admin_D5ffv7AT.mjs";
+import { t as $$Admin } from "./Admin_7x7lGI5U.mjs";
 //#region src/pages/admin/checkin.astro
 var checkin_exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Checkin,

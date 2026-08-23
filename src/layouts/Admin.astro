@@ -4,7 +4,7 @@ import Brand from "../components/Brand.astro";
 
 interface Props {
   title: string;
-  active: "overview" | "scan" | "checkin" | "counts";
+  active: "overview" | "scan" | "checkin" | "counts" | "volunteers";
 }
 
 const { title, active } = Astro.props;
@@ -14,6 +14,7 @@ const tabs = [
   { key: "scan", href: "/admin/scan", label: "Scan" },
   { key: "checkin", href: "/admin/checkin", label: "Search" },
   { key: "counts", href: "/admin/counts", label: "Headcounts" },
+  { key: "volunteers", href: "/admin/volunteers", label: "Volunteers" },
 ] as const;
 ---
 

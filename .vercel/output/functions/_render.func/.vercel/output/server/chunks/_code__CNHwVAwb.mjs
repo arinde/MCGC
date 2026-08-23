@@ -36,15 +36,18 @@ var $$Code = createComponent(async ($$result, $$props, $$slots) => {
 		"href": "/",
 		"size": "md",
 		"data-astro-cid-vwldfv5k": true
-	})}<p class="card__event" data-astro-cid-vwldfv5k>${convention.title} ${convention.year}</p></header><div class="card__qr" data-astro-cid-vwldfv5k>${unescapeHTML(qr)}</div><p class="card__code" data-astro-cid-vwldfv5k>${code}</p><p class="card__hint" data-astro-cid-vwldfv5k>Show this at the gate. If it won’t scan, read out the code.</p><dl class="card__details" data-astro-cid-vwldfv5k><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Name</dt><dd data-astro-cid-vwldfv5k>${registration.name}</dd></div><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Coming</dt><dd data-astro-cid-vwldfv5k>${registration.party_size === 1 ? "Just them" : `${registration.party_size} people`}</dd></div><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Days</dt><dd data-astro-cid-vwldfv5k>${registration.days.length ? registration.days.join(", ") : "Not stated"}</dd></div><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Venue</dt><dd data-astro-cid-vwldfv5k>${convention.venue.name}<span data-astro-cid-vwldfv5k>${convention.datesLabel}</span></dd></div></dl><div class="card__actions" data-astro-cid-vwldfv5k>${renderComponent($$result, "Button", $$Button, {
-		"href": "/#venue",
+	})}<p class="card__event" data-astro-cid-vwldfv5k>${convention.title} ${convention.year}</p></header><div class="card__qr" data-astro-cid-vwldfv5k>${unescapeHTML(qr)}</div><p class="card__code" id="pass-code" data-astro-cid-vwldfv5k>${code}</p><p class="card__hint" data-astro-cid-vwldfv5k>Show this at the gate. If it won’t scan, read out the code.</p><dl class="card__details" data-astro-cid-vwldfv5k><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Name</dt><dd id="pass-name" data-astro-cid-vwldfv5k>${registration.name}</dd></div><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Coming</dt><dd data-astro-cid-vwldfv5k>${registration.party_size === 1 ? "Just them" : `${registration.party_size} people`}</dd></div><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Days</dt><dd data-astro-cid-vwldfv5k>${registration.days.length ? registration.days.join(", ") : "Not stated"}</dd></div><div data-astro-cid-vwldfv5k><dt data-astro-cid-vwldfv5k>Venue</dt><dd data-astro-cid-vwldfv5k>${convention.venue.name}<span data-astro-cid-vwldfv5k>${convention.datesLabel}</span></dd></div></dl><div class="card__actions" data-astro-cid-vwldfv5k>${renderComponent($$result, "Button", $$Button, {
+		"id": "save-pass",
+		"data-astro-cid-vwldfv5k": true
+	}, { "default": ($$result) => renderTemplate`Save to my phone` })}${renderComponent($$result, "Button", $$Button, {
+		"id": "add-calendar",
 		"variant": "ghost",
 		"data-astro-cid-vwldfv5k": true
-	}, { "default": ($$result) => renderTemplate`Getting there` })}${renderComponent($$result, "Button", $$Button, {
+	}, { "default": ($$result) => renderTemplate`Add to calendar` })}${renderComponent($$result, "Button", $$Button, {
 		"id": "share-pass",
 		"variant": "ghost",
 		"data-astro-cid-vwldfv5k": true
-	}, { "default": ($$result) => renderTemplate`Share my pass` })}</div><p class="card__save" data-astro-cid-vwldfv5k>Screenshot this page — it works with no signal at the gate.</p></article>` : renderTemplate`<article class="card card--empty" data-astro-cid-vwldfv5k>${renderComponent($$result, "Brand", $$Brand, {
+	}, { "default": ($$result) => renderTemplate`Share` })}</div><p class="card__save" data-astro-cid-vwldfv5k>Saved to your photos, this works at the gate with no signal at all. The page also opens offline once you have visited it.</p></article>` : renderTemplate`<article class="card card--empty" data-astro-cid-vwldfv5k>${renderComponent($$result, "Brand", $$Brand, {
 		"href": "/",
 		"size": "md",
 		"data-astro-cid-vwldfv5k": true

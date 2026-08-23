@@ -2,7 +2,7 @@ import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { D as maybeRenderHead, E as renderTemplate, I as createAstro, b as renderComponent, k as addAttribute } from "./sequence_cgC9RwYc.mjs";
 import { t as createComponent } from "./compiler_CQKGis8q.mjs";
 import { a as convention, n as isConfigured, o as currentDayLabel, r as logActivity, t as getSupabase } from "./supabase_DnnZyzMy.mjs";
-import { t as $$Admin } from "./Admin_D5ffv7AT.mjs";
+import { t as $$Admin } from "./Admin_7x7lGI5U.mjs";
 import { t as $$Button } from "./Button_DBgNkQE9.mjs";
 //#region src/pages/admin/counts.astro
 var counts_exports = /* @__PURE__ */ __exportAll({

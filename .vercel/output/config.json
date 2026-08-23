@@ -44,6 +44,10 @@
 			"dest": "_render"
 		},
 		{
+			"src": "^/admin/volunteers/?$",
+			"dest": "_render"
+		},
+		{
 			"src": "^/admin/?$",
 			"dest": "_render"
 		},
@@ -57,6 +61,10 @@
 		},
 		{
 			"src": "^/api/search/?$",
+			"dest": "_render"
+		},
+		{
+			"src": "^/api/volunteer/?$",
 			"dest": "_render"
 		},
 		{

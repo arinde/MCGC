@@ -1,0 +1,304 @@
+---
+import Admin from "../../layouts/Admin.astro";
+import { getSupabase, isConfigured } from "../../lib/supabase";
+import { TEAMS, teamName } from "../../lib/volunteers";
+
+// Live list behind auth.
+export const prerender = false;
+
+type Volunteer = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  branch: string | null;
+  teams: string[];
+  days: string[];
+  experience: string | null;
+  status: string;
+  created_at: string;
+};
+
+const teamFilter = Astro.url.searchParams.get("team") ?? "all";
+
+let volunteers: Volunteer[] = [];
+let ready = isConfigured();
+let loadError = "";
+
+if (ready) {
+  try {
+    let query = getSupabase()
+      .from("volunteers")
+      .select("id, name, phone, email, branch, teams, days, experience, status, created_at")
+      .order("created_at", { ascending: false });
+
+    if (teamFilter !== "all") query = query.contains("teams", [teamFilter]);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    volunteers = (data ?? []) as Volunteer[];
+  } catch (error) {
+    console.error("[volunteers] load failed:", error);
+    ready = false;
+    loadError =
+      "Couldn’t load volunteers. If you just added the volunteers table, re-run supabase/schema.sql.";
+  }
+}
+
+const counts = new Map<string, number>();
+for (const volunteer of volunteers) {
+  for (const team of volunteer.teams) counts.set(team, (counts.get(team) ?? 0) + 1);
+}
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+---
+
+<Admin title="Volunteers" active="volunteers">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Serving</p>
+      <h1 class="page-head__title">Volunteers</h1>
+    </div>
+    <p class="page-head__meta"><b>{volunteers.length}</b> signed up</p>
+  </div>
+
+  {
+    !ready ? (
+      <p class="empty">{loadError || "Connect the database first — see the Overview tab."}</p>
+    ) : (
+      <>
+        <div class="filters">
+          <a href="/admin/volunteers" class:list={["filter", teamFilter === "all" && "filter--on"]}>
+            All
+          </a>
+          {TEAMS.map((team) => (
+            <a
+              href={`/admin/volunteers?team=${team.id}`}
+              class:list={["filter", teamFilter === team.id && "filter--on"]}
+            >
+              {team.name}
+              <b>{counts.get(team.id) ?? 0}</b>
+            </a>
+          ))}
+        </div>
+
+        {volunteers.length === 0 ? (
+          <div class="empty-state">
+            <p>
+              <b>No volunteers yet{teamFilter !== "all" ? ` for ${teamName(teamFilter)}` : ""}.</b>
+            </p>
+            <p>
+              Share the sign-up page and they’ll appear here as they come in.
+            </p>
+            <a class="empty-state__link" href="/volunteer">Open the sign-up page →</a>
+          </div>
+        ) : (
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Phone</th>
+                  <th scope="col">Teams</th>
+                  <th scope="col">Days</th>
+                  <th scope="col">Branch</th>
+                  <th scope="col">Signed up</th>
+                </tr>
+              </thead>
+              <tbody>
+                {volunteers.map((volunteer) => (
+                  <tr>
+                    <th scope="row">
+                      {volunteer.name}
+                      {volunteer.experience && <small>{volunteer.experience}</small>}
+                    </th>
+                    <td>
+                      <a href={`tel:${volunteer.phone}`}>{volunteer.phone}</a>
+                    </td>
+                    <td>
+                      <span class="tags">
+                        {volunteer.teams.map((team) => (
+                          <span class="tag">{teamName(team)}</span>
+                        ))}
+                      </span>
+                    </td>
+                    <td>{volunteer.days.length ? volunteer.days.join(", ") : "Any"}</td>
+                    <td>{volunteer.branch ?? "—"}</td>
+                    <td>{dateFormat.format(new Date(volunteer.created_at))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
+    )
+  }
+</Admin>
+
+<style>
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .page-head__title {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    margin: var(--space-1) 0 0;
+  }
+
+  .page-head__meta {
+    font-size: var(--text-sm);
+    color: var(--color-ink-mute);
+    margin: 0;
+  }
+
+  .page-head__meta b {
+    font-size: var(--text-xl);
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink-mute);
+    text-decoration: none;
+  }
+
+  .filter b {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+  }
+
+  .filter--on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .filter--on b {
+    color: var(--on-accent);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 1px solid var(--color-line);
+    white-space: nowrap;
+  }
+
+  thead th {
+    position: sticky;
+    top: 56px;
+    background: var(--color-canvas);
+    z-index: 1;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-mute);
+  }
+
+  tbody th {
+    font-weight: 700;
+    color: var(--color-ink);
+    white-space: normal;
+  }
+
+  tbody th small {
+    display: block;
+    font-weight: 400;
+    font-size: var(--text-xs);
+    color: var(--color-ink-mute);
+    margin-top: 2px;
+  }
+
+  td {
+    color: var(--color-ink-mute);
+  }
+
+  td a {
+    color: var(--color-info);
+    text-decoration: none;
+  }
+
+  .tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .tag {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    padding: 2px var(--space-2);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+  }
+
+  .empty-state {
+    border: 1px dashed var(--color-line);
+    border-radius: var(--radius-md);
+    padding: var(--space-8);
+    text-align: center;
+    color: var(--color-ink-mute);
+  }
+
+  .empty-state p {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-sm);
+  }
+
+  .empty-state b {
+    color: var(--color-ink);
+  }
+
+  .empty-state__link {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-weight: 600;
+    color: var(--color-info);
+    text-decoration: none;
+  }
+
+  .empty {
+    color: var(--color-ink-mute);
+  }
+</style>

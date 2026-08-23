@@ -28,6 +28,11 @@ var $$Admin = createComponent(($$result, $$props, $$slots) => {
 			key: "counts",
 			href: "/admin/counts",
 			label: "Headcounts"
+		},
+		{
+			key: "volunteers",
+			href: "/admin/volunteers",
+			label: "Volunteers"
 		}
 	];
 	return renderTemplate`${renderComponent($$result, "Base", $$Base, {
