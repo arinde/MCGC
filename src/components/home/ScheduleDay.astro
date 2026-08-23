@@ -1,0 +1,116 @@
+---
+import type { Day } from "../../data/convention";
+
+interface Props {
+  day: Day;
+  index: number;
+  selected: boolean;
+}
+
+const { day, index, selected } = Astro.props;
+---
+
+<div role="tabpanel" id={`panel-${index}`} aria-labelledby={`tab-${index}`} hidden={!selected}>
+  <div class="day-head">
+    <h3>{day.title}</h3>
+    <span class="day-head__when">{day.date} &middot; {day.sub}</span>
+  </div>
+
+  <ul class="sessions">
+    {
+      day.sessions.map((session) => (
+        <li>
+          <div class="session__time">{session.time}</div>
+          <div>
+            <p class="session__title">{session.title}</p>
+            <p class="session__who">{session.who}</p>
+            {session.tag && <span class="session__tag">{session.tag}</span>}
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .day-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .day-head h3 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    margin: 0;
+  }
+
+  .day-head__when {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .sessions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sessions li {
+    display: grid;
+    gap: 4px 22px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line-soft);
+    grid-template-columns: 1fr;
+  }
+
+  .sessions li:last-child {
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .session__time {
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    padding-top: 3px;
+  }
+
+  .session__title {
+    font-size: 1.06rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .session__who {
+    font-size: 0.88rem;
+    color: var(--dim);
+    margin: 2px 0 0;
+  }
+
+  .session__tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-deep);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+
+  @media (min-width: 640px) {
+    .sessions li {
+      grid-template-columns: 112px 1fr;
+    }
+  }
+</style>

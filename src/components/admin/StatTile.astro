@@ -1,0 +1,60 @@
+---
+interface Props {
+  label: string;
+  value: number | string;
+  detail?: string;
+  /** Emphasises the headline number — use for the one figure that matters most. */
+  feature?: boolean;
+}
+
+const { label, value, detail, feature = false } = Astro.props;
+---
+
+<div class:list={["tile", feature && "tile--feature"]}>
+  <p class="tile__label">{label}</p>
+  <p class="tile__value">{value}</p>
+  {detail && <p class="tile__detail">{detail}</p>}
+</div>
+
+<style>
+  .tile {
+    background: var(--ink-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .tile--feature {
+    border-color: var(--gold-deep);
+    background: rgba(232, 180, 74, 0.06);
+  }
+
+  .tile__label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    margin: 0 0 10px;
+  }
+
+  .tile--feature .tile__label {
+    color: var(--gold);
+  }
+
+  .tile__value {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 2.4rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--halo);
+    margin: 0;
+  }
+
+  .tile__detail {
+    font-size: 0.82rem;
+    color: var(--dim);
+    margin: 8px 0 0;
+  }
+</style>

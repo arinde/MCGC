@@ -1,5 +1,5 @@
 {
-  "name": "grubby-chroma",
+  "name": "mcgc-convention",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -9,12 +9,22 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "start": "astro dev"
   },
   "dependencies": {
-    "@astrojs/netlify": "^8.2.3",
     "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/vercel": "^11.0.7",
     "@supabase/supabase-js": "^2.112.3",
     "astro": "^7.2.4"
-  }
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "esbuild@0.28.2": true,
+    "sharp@0.34.5": true,
+    "sharp@0.35.3": true
+  },
+  "description": "Marketing site, registration and admin dashboard for the MCGC annual convention.",
+  "private": true
 }

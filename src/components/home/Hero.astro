@@ -1,0 +1,167 @@
+---
+import { convention } from "../../data/convention";
+import Button from "../Button.astro";
+import Countdown from "./Countdown.astro";
+import DustMotes from "./DustMotes.astro";
+
+const { title, year, theme, tagline, verse, verseRef } = convention;
+---
+
+<header class="hero" id="top">
+  <div class="hero__shafts" aria-hidden="true">
+    <i></i><i></i><i></i>
+  </div>
+
+  <DustMotes />
+
+  <div class="wrap hero__inner">
+    <p class="eyebrow rv">{title} · {year}</p>
+
+    <h1 class="display hero__title rv">
+      {theme.map((word, i) => <>{i > 0 && <br />}{word}</>)}
+      <em>{tagline}</em>
+    </h1>
+
+    <blockquote class="verse rv">
+      &ldquo;{verse}&rdquo;
+      <cite>{verseRef}</cite>
+    </blockquote>
+
+    <div class="hero__cta rv">
+      <Button href="#register">Register free</Button>
+      <Button href="#schedule" variant="ghost">See the schedule</Button>
+    </div>
+
+    <div class="rv">
+      <Countdown />
+    </div>
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(56px, 11vw, 110px) clamp(48px, 8vw, 88px);
+  }
+
+  /* Ambient halo behind the headline. */
+  .hero::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -30%;
+    transform: translateX(-50%);
+    width: min(1000px, 140vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232, 180, 74, 0.13), transparent 62%);
+    pointer-events: none;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero .eyebrow {
+    margin-bottom: 20px;
+  }
+
+  .hero__title {
+    font-size: var(--step-4);
+  }
+
+  .hero__title em {
+    display: block;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.42em;
+    letter-spacing: 0.01em;
+    color: var(--gold);
+    margin-top: 0.28em;
+  }
+
+  .verse {
+    margin: 26px 0 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--gold-deep);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1rem, 2.4vw, 1.22rem);
+    color: var(--halo);
+    max-width: 46ch;
+    line-height: 1.5;
+  }
+
+  .verse cite {
+    display: block;
+    font-style: normal;
+    font-family: var(--font-body);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    margin-top: 10px;
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 34px;
+  }
+
+  /* ---- light shafts ---- */
+
+  .hero__shafts {
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 130%;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  .hero__shafts i {
+    position: absolute;
+    top: -30%;
+    width: 34vw;
+    height: 170%;
+    background: linear-gradient(
+      to bottom,
+      rgba(232, 180, 74, 0.16),
+      rgba(232, 180, 74, 0.04) 42%,
+      transparent 72%
+    );
+    transform-origin: top center;
+    filter: blur(22px);
+    animation: sway 14s ease-in-out infinite alternate;
+  }
+
+  .hero__shafts i:nth-child(1) {
+    left: 2%;
+    animation-delay: -2s;
+  }
+
+  .hero__shafts i:nth-child(2) {
+    left: 34%;
+    opacity: 0.7;
+    animation-delay: -6s;
+  }
+
+  .hero__shafts i:nth-child(3) {
+    left: 66%;
+    opacity: 0.5;
+    animation-delay: -9s;
+  }
+
+  @keyframes sway {
+    from {
+      transform: rotate(9deg) translateX(-1.5vw);
+    }
+    to {
+      transform: rotate(15deg) translateX(1.5vw);
+    }
+  }
+</style>

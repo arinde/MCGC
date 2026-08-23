@@ -1,0 +1,85 @@
+---
+import "../styles/global.css";
+import { convention } from "../data/convention";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Dashboard pages skip the share-card tags and ask robots to stay away. */
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = `${convention.title} ${convention.year} — ${convention.datesLabel}. ${convention.venue.name}. Free to attend.`,
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// The share card is what people actually see when this link lands in a
+// WhatsApp group, so it matters more here than the page title does.
+const shareImage = new URL("/og.png", Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    {
+      !noindex && (
+        <>
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content={convention.church} />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:url" content={canonical} />
+          <meta property="og:image" content={shareImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="theme-color" content="#0b0d1a" />
+        </>
+      )
+    }
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Manrope:wght@400;500;600;700;800&display=swap"
+    />
+
+    <slot name="head" />
+  </head>
+
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+    <slot />
+
+    <style>
+      .skip {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        z-index: 100;
+        background: var(--gold);
+        color: var(--on-gold);
+        padding: 12px 20px;
+        font-weight: 700;
+        border-radius: 0 0 var(--radius-sm) 0;
+      }
+
+      .skip:focus {
+        left: 0;
+      }
+    </style>
+  </body>
+</html>

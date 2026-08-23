@@ -1,0 +1,135 @@
+---
+import Base from "./Base.astro";
+
+interface Props {
+  title: string;
+  active: "overview" | "checkin" | "counts";
+}
+
+const { title, active } = Astro.props;
+
+const tabs = [
+  { key: "overview", href: "/admin", label: "Overview" },
+  { key: "checkin", href: "/admin/checkin", label: "Check-in" },
+  { key: "counts", href: "/admin/counts", label: "Headcounts" },
+] as const;
+---
+
+<Base title={`${title} · MCGC Admin`} noindex>
+  <header class="admin-bar">
+    <div class="wrap admin-bar__inner">
+      <a class="admin-bar__mark" href="/admin">
+        MC<span>G</span>C <small>admin</small>
+      </a>
+
+      <nav class="admin-bar__tabs" aria-label="Dashboard sections">
+        {
+          tabs.map((tab) => (
+            <a href={tab.href} aria-current={active === tab.key ? "page" : undefined}>
+              {tab.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <form method="POST" action="/admin/logout" class="admin-bar__logout">
+        <button type="submit">Sign out</button>
+      </form>
+    </div>
+  </header>
+
+  <main id="main" class="admin-main">
+    <div class="wrap">
+      <slot />
+    </div>
+  </main>
+</Base>
+
+<style>
+  .admin-bar {
+    background: var(--ink-2);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .admin-bar__inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 60px;
+    flex-wrap: wrap;
+  }
+
+  .admin-bar__mark {
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--halo);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-bar__mark span {
+    color: var(--gold);
+  }
+
+  .admin-bar__mark small {
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    margin-left: 6px;
+  }
+
+  .admin-bar__tabs {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .admin-bar__tabs a {
+    color: var(--dim);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+
+  .admin-bar__tabs a:hover {
+    color: var(--halo);
+  }
+
+  .admin-bar__tabs a[aria-current="page"] {
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+
+  .admin-bar__logout button {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .admin-bar__logout button:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .admin-main {
+    padding-block: 34px 80px;
+  }
+</style>

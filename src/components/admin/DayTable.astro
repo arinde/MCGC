@@ -1,0 +1,210 @@
+---
+import type { DayRow } from "../../lib/stats";
+
+interface Props {
+  days: DayRow[];
+}
+
+const { days } = Astro.props;
+
+/** Bar width is relative to the busiest night, so the shape is readable at any scale. */
+const peak = Math.max(1, ...days.map((day) => Math.max(day.registeredPeople, day.attendedPeople)));
+
+function turnoutLabel(turnout: number | null): string {
+  return turnout === null ? "—" : `${Math.round(turnout * 100)}%`;
+}
+
+function turnoutState(turnout: number | null): string {
+  if (turnout === null) return "none";
+  if (turnout >= 0.8) return "good";
+  if (turnout >= 0.5) return "warn";
+  return "bad";
+}
+---
+
+<div class="panel">
+  <h2 class="panel__title">Night by night</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Night</th>
+          <th scope="col">Registered</th>
+          <th scope="col">Attended</th>
+          <th scope="col">Turnout</th>
+          <th scope="col" class="col-bar"><span class="sr-only">Comparison</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          days.map((day) => (
+            <tr>
+              <th scope="row">{day.label}</th>
+              <td>
+                {day.registeredPeople}
+                <small>{day.registeredParties} bookings</small>
+              </td>
+              <td>
+                {day.attendedPeople || "—"}
+                {day.attendedParties > 0 && <small>{day.attendedParties} checked in</small>}
+              </td>
+              <td>
+                <span class:list={["pill", `pill--${turnoutState(day.turnout)}`]}>
+                  {turnoutLabel(day.turnout)}
+                </span>
+              </td>
+              <td class="col-bar">
+                <span class="bar bar--registered" style={`width:${(day.registeredPeople / peak) * 100}%`} />
+                <span class="bar bar--attended" style={`width:${(day.attendedPeople / peak) * 100}%`} />
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="legend">
+    <span class="key key--registered"></span> Registered
+    <span class="key key--attended"></span> Actually attended
+  </p>
+</div>
+
+<style>
+  .panel {
+    background: var(--ink-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+
+  .panel__title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin: 0 0 18px;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 12px 14px 12px 0;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    border-bottom-color: var(--line);
+  }
+
+  tbody th {
+    font-weight: 700;
+    color: var(--halo);
+    white-space: nowrap;
+  }
+
+  td {
+    color: var(--halo);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  td small {
+    display: block;
+    font-weight: 500;
+    font-size: 0.74rem;
+    color: var(--dimmer);
+    margin-top: 2px;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border: 1px solid;
+  }
+
+  .pill--good {
+    color: var(--good);
+    border-color: var(--good);
+  }
+
+  .pill--warn {
+    color: var(--warn);
+    border-color: var(--gold-deep);
+  }
+
+  .pill--bad {
+    color: var(--bad);
+    border-color: var(--bad);
+  }
+
+  .pill--none {
+    color: var(--dimmer);
+    border-color: var(--line);
+  }
+
+  .col-bar {
+    width: 34%;
+    min-width: 120px;
+  }
+
+  .bar {
+    display: block;
+    height: 8px;
+    border-radius: 999px;
+    min-width: 2px;
+  }
+
+  .bar--registered {
+    background: var(--gold-deep);
+    margin-bottom: 4px;
+  }
+
+  .bar--attended {
+    background: var(--gold);
+  }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    color: var(--dimmer);
+    margin: 16px 0 0;
+  }
+
+  .key {
+    width: 14px;
+    height: 8px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .key--registered {
+    background: var(--gold-deep);
+  }
+
+  .key--attended {
+    background: var(--gold);
+    margin-left: 10px;
+  }
+</style>

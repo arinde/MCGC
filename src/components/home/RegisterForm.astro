@@ -1,0 +1,354 @@
+---
+import { convention } from "../../data/convention";
+import Button from "../Button.astro";
+
+const { days } = convention;
+
+const noteOptions = [
+  "First-time guest",
+  "Bringing children",
+  "Needs transport",
+  "Accessible seating",
+];
+---
+
+<div class="confirm" id="reg-confirm" role="status" aria-live="polite" hidden>
+  <h3 id="reg-confirm-head"></h3>
+  <p id="reg-confirm-body"></p>
+  <p class="confirm__code">
+    Your code: <b id="reg-confirm-code"></b>
+    <span>Show this at the door, or just give your name.</span>
+  </p>
+</div>
+
+<form class="form" id="reg-form" novalidate>
+  <div class="field">
+    <label for="f-name">Full name</label>
+    <input type="text" id="f-name" name="name" placeholder="First and last name" autocomplete="name" required />
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="f-phone">Phone (WhatsApp)</label>
+      <input type="tel" id="f-phone" name="phone" placeholder="0803 000 0000" autocomplete="tel" required />
+    </div>
+    <div class="field">
+      <label for="f-email">Email <span class="field__optional">(optional)</span></label>
+      <input type="email" id="f-email" name="email" placeholder="you@email.com" autocomplete="email" />
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="f-branch">Branch / church</label>
+      <input type="text" id="f-branch" name="branch" placeholder="e.g. Headquarters" autocomplete="organization" />
+    </div>
+    <div class="field">
+      <label for="f-guests">Coming with how many?</label>
+      <select id="f-guests" name="guestsLabel">
+        <option value="Just me">Just me</option>
+        <option value="Me + 1">Me + 1</option>
+        <option value="Me + 2">Me + 2</option>
+        <option value="Me + 3">Me + 3</option>
+        <option value="Me + 4 or more">Me + 4 or more</option>
+      </select>
+    </div>
+  </div>
+
+  <fieldset class="field">
+    <legend>Which nights will you join?</legend>
+    <div class="chips">
+      {
+        days.map((day, index) => (
+          <label class="chip">
+            <input type="checkbox" name="days" value={day.label} checked={index === 0} />
+            <span>{day.label}</span>
+          </label>
+        ))
+      }
+      <label class="chip">
+        <input type="checkbox" name="days" value="All four days" />
+        <span>All four</span>
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset class="field">
+    <legend>Anything we should know?</legend>
+    <div class="chips">
+      {
+        noteOptions.map((note) => (
+          <label class="chip">
+            <input type="checkbox" name="flags" value={note} />
+            <span>{note.replace("Needs", "Need")}</span>
+          </label>
+        ))
+      }
+    </div>
+  </fieldset>
+
+  <div class="form__actions">
+    <Button type="submit" id="reg-submit">Send my registration</Button>
+  </div>
+
+  <p class="form__note" id="reg-note">
+    Free, and takes a moment. We only use your number to send one reminder.
+  </p>
+</form>
+
+<script>
+  const form = document.getElementById("reg-form") as HTMLFormElement | null;
+  const note = document.getElementById("reg-note");
+  const submit = document.getElementById("reg-submit") as HTMLButtonElement | null;
+  const confirmBox = document.getElementById("reg-confirm");
+
+  const DEFAULT_NOTE = "Free, and takes a moment. We only use your number to send one reminder.";
+
+  if (form && note && submit && confirmBox) {
+    const setNote = (message: string, isError: boolean) => {
+      note.textContent = message;
+      note.classList.toggle("is-error", isError);
+    };
+
+    const showConfirmation = (data: {
+      name: string;
+      code: string;
+      days: string[];
+      alreadyRegistered: boolean;
+    }) => {
+      const firstName = data.name.split(" ")[0];
+      document.getElementById("reg-confirm-head")!.textContent = data.alreadyRegistered
+        ? `Updated — see you there, ${firstName}.`
+        : `You’re registered — see you there, ${firstName}.`;
+      document.getElementById("reg-confirm-body")!.textContent = data.days.length
+        ? `We have you down for ${data.days.join(", ")}. Doors open 30 minutes before each session.`
+        : "We have you down. Doors open 30 minutes before each session.";
+      document.getElementById("reg-confirm-code")!.textContent = data.code;
+
+      confirmBox.hidden = false;
+      confirmBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const payload = {
+        name: String(formData.get("name") ?? ""),
+        phone: String(formData.get("phone") ?? ""),
+        email: String(formData.get("email") ?? ""),
+        branch: String(formData.get("branch") ?? ""),
+        guestsLabel: String(formData.get("guestsLabel") ?? ""),
+        days: formData.getAll("days").map(String),
+        flags: formData.getAll("flags").map(String),
+      };
+
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      setNote(DEFAULT_NOTE, false);
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          const firstError = result.errors?.[0];
+          setNote(firstError?.message ?? "Something went wrong. Please try again.", true);
+          if (firstError?.field) {
+            form.querySelector<HTMLInputElement>(`[name="${firstError.field}"]`)?.focus();
+          }
+          return;
+        }
+
+        showConfirmation(result);
+        form.reset();
+      } catch {
+        setNote(
+          "We couldn’t reach the server. Check your connection and try again — or call the convention desk.",
+          true,
+        );
+      } finally {
+        submit.disabled = false;
+        submit.textContent = "Send my registration";
+      }
+    });
+  }
+</script>
+
+<style>
+  .form {
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: clamp(22px, 4vw, 34px);
+  }
+
+  .field {
+    margin-bottom: 18px;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .field label,
+  .field legend {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  .field__optional {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    background: var(--ink-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--halo);
+    font-family: inherit;
+    font-size: 0.98rem;
+    padding: 13px 15px;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--gold);
+    outline: none;
+  }
+
+  .field input::placeholder {
+    color: var(--dimmer);
+  }
+
+  .field-row {
+    display: grid;
+    gap: 18px;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .chip {
+    position: relative;
+  }
+
+  .chip input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .chip span {
+    display: block;
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--dim);
+    transition:
+      background 0.18s var(--ease),
+      color 0.18s var(--ease),
+      border-color 0.18s var(--ease);
+  }
+
+  .chip input:checked + span {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--on-gold);
+  }
+
+  .chip input:focus-visible + span {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .form__note {
+    font-size: 0.8rem;
+    color: var(--dimmer);
+    margin: 16px 0 0;
+    line-height: 1.6;
+  }
+
+  .form__note.is-error {
+    color: var(--gold);
+  }
+
+  .confirm {
+    border: 1px solid var(--gold-deep);
+    background: rgba(232, 180, 74, 0.07);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+
+  .confirm h3 {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--gold);
+  }
+
+  .confirm p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--dim);
+  }
+
+  .confirm__code {
+    margin-top: 14px !important;
+    padding-top: 14px;
+    border-top: 1px solid var(--gold-deep);
+  }
+
+  .confirm__code b {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--halo);
+    letter-spacing: 0.12em;
+    display: inline-block;
+    margin-left: 4px;
+  }
+
+  .confirm__code span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--dimmer);
+    margin-top: 4px;
+  }
+
+  @media (min-width: 560px) {
+    .field-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

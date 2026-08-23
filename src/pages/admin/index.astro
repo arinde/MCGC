@@ -1,0 +1,436 @@
+---
+import Admin from "../../layouts/Admin.astro";
+import StatTile from "../../components/admin/StatTile.astro";
+import DayTable from "../../components/admin/DayTable.astro";
+import Button from "../../components/Button.astro";
+import { loadDashboard, type DashboardData } from "../../lib/stats";
+import { isConfigured } from "../../lib/supabase";
+
+// Live figures — never prerender.
+export const prerender = false;
+
+let data: DashboardData | null = null;
+let loadError = "";
+
+if (!isConfigured()) {
+  loadError = "Supabase isn’t configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your .env.";
+} else {
+  try {
+    data = await loadDashboard();
+  } catch (error) {
+    console.error("[dashboard] load failed:", error);
+    loadError = "Couldn’t reach the database. Check the credentials and that schema.sql has been run.";
+  }
+}
+
+const exportLists = [
+  { filter: "all", label: "Everyone" },
+  { filter: "First-time guest", label: "First-timers" },
+  { filter: "Bringing children", label: "Bringing children" },
+  { filter: "Needs transport", label: "Need transport" },
+  { filter: "Accessible seating", label: "Accessible seating" },
+];
+
+const timeFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+---
+
+<Admin title="Overview" active="overview">
+  {
+    loadError ? (
+      <div class="notice">
+        <h1 class="display notice__title">Not connected yet</h1>
+        <p>{loadError}</p>
+        <p class="notice__hint">See <code>README.md</code> → “Setting up the database”.</p>
+      </div>
+    ) : (
+      data && (
+        <>
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Live</p>
+              <h1 class="display page-head__title">Registrations</h1>
+            </div>
+            <p class="page-head__meta">
+              {data.totals.registeredToday} today · refreshes every 30s
+            </p>
+          </div>
+
+          <div class="tiles">
+            <StatTile
+              label="People expected"
+              value={data.totals.people}
+              detail={`${data.totals.parties} bookings`}
+              feature
+            />
+            <StatTile label="First-timers" value={data.totals.firstTimers} detail="Follow-up list" />
+            <StatTile label="Bringing children" value={data.totals.withChildren} detail="For children's church" />
+            <StatTile label="Need transport" value={data.totals.needTransport} detail="For the shuttle team" />
+          </div>
+
+          <div class="columns">
+            <DayTable days={data.days} />
+
+            <div class="panel">
+              <h2 class="panel__title">By branch</h2>
+              {data.branches.length === 0 ? (
+                <p class="empty">No registrations yet.</p>
+              ) : (
+                <ul class="branches">
+                  {data.branches.map((branch) => (
+                    <li>
+                      <span class="branches__name">{branch.branch}</span>
+                      <span class="branches__count">{branch.people}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <h2 class="panel__title">Latest registrations</h2>
+              <div class="exports">
+                {exportLists.map((list) => (
+                  <a class="export" href={`/admin/export.csv?filter=${encodeURIComponent(list.filter)}`}>
+                    {list.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {data.recent.length === 0 ? (
+              <p class="empty">Nothing yet — the first registration will appear here.</p>
+            ) : (
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Phone</th>
+                      <th scope="col">Branch</th>
+                      <th scope="col">Party</th>
+                      <th scope="col">Nights</th>
+                      <th scope="col">Code</th>
+                      <th scope="col">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.recent.map((registration) => (
+                      <tr>
+                        <th scope="row">
+                          {registration.name}
+                          {registration.flags.length > 0 && (
+                            <small>{registration.flags.join(" · ")}</small>
+                          )}
+                        </th>
+                        <td>{registration.phone}</td>
+                        <td>{registration.branch ?? "—"}</td>
+                        <td>{registration.party_size}</td>
+                        <td>{registration.days.join(", ") || "—"}</td>
+                        <td><code>{registration.code}</code></td>
+                        <td>{timeFormat.format(new Date(registration.created_at))}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div class="panel">
+            <h2 class="panel__title">Activity</h2>
+            {data.activity.length === 0 ? (
+              <p class="empty">No activity recorded yet.</p>
+            ) : (
+              <ul class="activity">
+                {data.activity.map((entry) => (
+                  <li>
+                    <span class:list={["activity__kind", `activity__kind--${entry.kind}`]}>
+                      {entry.kind}
+                    </span>
+                    <span class="activity__text">{entry.summary}</span>
+                    <time>{timeFormat.format(new Date(entry.created_at))}</time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )
+    )
+  }
+</Admin>
+
+<script>
+  // The dashboard is watched during the convention, so keep it current without
+  // the user thinking about it. Pauses in a background tab to save data.
+  const REFRESH_MS = 30_000;
+  let timer: ReturnType<typeof setTimeout>;
+
+  const schedule = () => {
+    clearTimeout(timer);
+    if (document.hidden) return;
+    timer = setTimeout(() => location.reload(), REFRESH_MS);
+  };
+
+  document.addEventListener("visibilitychange", schedule);
+  schedule();
+</script>
+
+<style>
+  .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+
+  .page-head__title {
+    font-size: 2.2rem;
+    margin-top: 10px;
+  }
+
+  .page-head__meta {
+    font-size: 0.8rem;
+    color: var(--dimmer);
+    margin: 0;
+  }
+
+  .tiles {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 22px;
+  }
+
+  .columns {
+    display: grid;
+    gap: 22px;
+    margin-bottom: 22px;
+  }
+
+  .panel {
+    background: var(--ink-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+
+  .panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .panel__title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin: 0 0 18px;
+  }
+
+  .panel__head .panel__title {
+    margin: 0;
+  }
+
+  .exports {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .export {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--dim);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 999px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .export:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 11px 14px 11px 0;
+    border-bottom: 1px solid var(--line-soft);
+    white-space: nowrap;
+  }
+
+  thead th {
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    border-bottom-color: var(--line);
+  }
+
+  tbody th {
+    font-weight: 700;
+    color: var(--halo);
+    white-space: normal;
+  }
+
+  tbody th small {
+    display: block;
+    font-weight: 500;
+    font-size: 0.72rem;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+
+  td {
+    color: var(--dim);
+  }
+
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+  }
+
+  .branches {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .branches li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 0.9rem;
+  }
+
+  .branches__name {
+    color: var(--halo);
+  }
+
+  .branches__count {
+    color: var(--gold);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .activity {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .activity li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 0.86rem;
+  }
+
+  .activity__kind {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    color: var(--dimmer);
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .activity__kind--registration {
+    color: var(--gold);
+    border-color: var(--gold-deep);
+  }
+
+  .activity__kind--checkin {
+    color: var(--good);
+    border-color: var(--good);
+  }
+
+  .activity__text {
+    color: var(--halo);
+  }
+
+  .activity time {
+    color: var(--dimmer);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .empty {
+    color: var(--dimmer);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .notice {
+    background: var(--ink-2);
+    border: 1px solid var(--gold-deep);
+    border-radius: var(--radius);
+    padding: 30px;
+    max-width: 60ch;
+  }
+
+  .notice__title {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+  }
+
+  .notice p {
+    color: var(--dim);
+    margin: 0 0 8px;
+  }
+
+  .notice__hint {
+    font-size: 0.86rem;
+    color: var(--dimmer) !important;
+  }
+
+  @media (min-width: 900px) {
+    .columns {
+      grid-template-columns: 1.4fr 1fr;
+      align-items: start;
+    }
+
+    .columns > :global(.panel) {
+      margin-bottom: 0;
+    }
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+/**
+ * The only button in the project. Renders <a> when given href, <button> otherwise,
+ * so a link never pretends to be a button (or vice versa) for screen readers.
+ */
+interface Props {
+  href?: string;
+  variant?: "gold" | "ghost";
+  size?: "md" | "sm";
+  type?: "button" | "submit";
+  id?: string;
+  class?: string;
+  external?: boolean;
+}
+
+const {
+  href,
+  variant = "gold",
+  size = "md",
+  type = "button",
+  id,
+  class: className = "",
+  external = false,
+} = Astro.props;
+
+const classes = ["btn", `btn--${variant}`, size === "sm" && "btn--sm", className]
+  .filter(Boolean)
+  .join(" ");
+
+const externalAttrs = external ? { target: "_blank", rel: "noopener noreferrer" } : {};
+---
+
+{
+  href ? (
+    <a href={href} id={id} class={classes} {...externalAttrs}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} id={id} class={classes}>
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.18s var(--ease),
+      background 0.2s,
+      border-color 0.2s,
+      color 0.2s;
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn--gold {
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+
+  .btn--gold:hover {
+    background: var(--gold-bright);
+  }
+
+  .btn--ghost {
+    border-color: var(--line);
+    color: var(--halo);
+    background: transparent;
+  }
+
+  .btn--ghost:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .btn--sm {
+    padding: 9px 17px;
+    font-size: 0.82rem;
+  }
+
+  .btn[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+import { convention } from "../../data/convention";
+import ScheduleDay from "./ScheduleDay.astro";
+
+const { days } = convention;
+---
+
+<section class="band" id="schedule">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">Programme</p>
+      <h2 class="display">Four nights, night by night.</h2>
+      <p class="lede">
+        Tap a day to see its full order of service. Doors open thirty minutes before each session.
+      </p>
+    </div>
+
+    <div class="rv">
+      <div class="tabs" role="tablist" aria-label="Convention days" id="schedule-tabs">
+        {
+          days.map((day, index) => (
+            <button
+              type="button"
+              class="tab"
+              role="tab"
+              id={`tab-${index}`}
+              aria-controls={`panel-${index}`}
+              aria-selected={index === 0}
+              tabindex={index === 0 ? 0 : -1}
+            >
+              {day.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <div id="schedule-panels">
+        {days.map((day, index) => <ScheduleDay day={day} index={index} selected={index === 0} />)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const tabList = document.getElementById("schedule-tabs");
+  const panelList = document.getElementById("schedule-panels");
+
+  if (tabList && panelList) {
+    const tabs = Array.from(tabList.querySelectorAll<HTMLButtonElement>(".tab"));
+    const panels = Array.from(panelList.children) as HTMLElement[];
+
+    const select = (next: number) => {
+      tabs.forEach((tab, index) => {
+        const isSelected = index === next;
+        tab.setAttribute("aria-selected", String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        panels[index].hidden = !isSelected;
+      });
+    };
+
+    tabList.addEventListener("click", (event) => {
+      const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(".tab");
+      if (tab) select(tabs.indexOf(tab));
+    });
+
+    // Arrow-key navigation is expected of a tablist, per WAI-ARIA.
+    tabList.addEventListener("keydown", (event) => {
+      const current = tabs.indexOf(document.activeElement as HTMLButtonElement);
+      if (current < 0) return;
+
+      const moves: Record<string, number> = {
+        ArrowRight: (current + 1) % tabs.length,
+        ArrowLeft: (current - 1 + tabs.length) % tabs.length,
+        Home: 0,
+        End: tabs.length - 1,
+      };
+
+      const next = moves[event.key];
+      if (next === undefined) return;
+
+      event.preventDefault();
+      select(next);
+      tabs[next].focus();
+    });
+  }
+</script>
+
+<style>
+  .tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 26px;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    padding: 11px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transition:
+      background 0.2s var(--ease),
+      color 0.2s var(--ease),
+      border-color 0.2s var(--ease);
+  }
+
+  .tab:hover {
+    color: var(--halo);
+    border-color: var(--dimmer);
+  }
+
+  .tab[aria-selected="true"] {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--on-gold);
+  }
+</style>

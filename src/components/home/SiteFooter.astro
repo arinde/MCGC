@@ -1,0 +1,131 @@
+---
+import { convention } from "../../data/convention";
+
+const { church, title, year, theme, datesLabel, venue, contact } = convention;
+const shareText = `${title} ${year} — ${theme.join(" ")}. ${datesLabel}, ${venue.name}. `;
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <a class="mark" href="#top">MC<span>G</span>C</a>
+        <p class="footer__blurb">
+          The annual convention of {church}. Everyone is welcome &mdash; come as you are.
+        </p>
+      </div>
+
+      <div>
+        <h2>Convention desk</h2>
+        <a href={`tel:+${contact.whatsapp}`}>{contact.display}</a>
+        <a href={`mailto:${contact.email}`}>{contact.email}</a>
+      </div>
+
+      <div>
+        <h2>Share it</h2>
+        <a href="#" id="share-whatsapp" data-text={shareText}>Send on WhatsApp</a>
+        <a href="#" id="share-copy">Copy the link</a>
+      </div>
+    </div>
+
+    <div class="footer__colophon">
+      <span>&copy; {year} {church}</span>
+      <span>Come expecting.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const whatsapp = document.getElementById("share-whatsapp");
+  const copy = document.getElementById("share-copy");
+
+  whatsapp?.addEventListener("click", (event) => {
+    event.preventDefault();
+    const text = (whatsapp as HTMLElement).dataset.text ?? "";
+    open(`https://wa.me/?text=${encodeURIComponent(text + location.href)}`, "_blank", "noopener");
+  });
+
+  copy?.addEventListener("click", async (event) => {
+    event.preventDefault();
+    const restore = (label: string) => {
+      copy.textContent = label;
+      setTimeout(() => (copy.textContent = "Copy the link"), 2200);
+    };
+
+    try {
+      await navigator.clipboard.writeText(location.href);
+      restore("Link copied");
+    } catch {
+      // Clipboard is blocked on insecure origins and in some in-app browsers.
+      restore(location.href);
+    }
+  });
+</script>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line-soft);
+    background: var(--ink-2);
+    padding-block: 52px 40px;
+  }
+
+  .footer__grid {
+    display: grid;
+    gap: 34px;
+  }
+
+  .footer h2 {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 14px;
+  }
+
+  .footer p,
+  .footer a:not(.mark) {
+    font-size: 0.9rem;
+    color: var(--dim);
+    text-decoration: none;
+    margin: 0 0 8px;
+    display: block;
+  }
+
+  .footer a:not(.mark):hover {
+    color: var(--halo);
+  }
+
+  .mark {
+    display: inline-flex;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.12rem;
+    letter-spacing: 0.04em;
+    color: var(--halo);
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+
+  .mark span {
+    color: var(--gold);
+  }
+
+  .footer__colophon {
+    margin-top: 40px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--dimmer);
+  }
+
+  @media (min-width: 760px) {
+    .footer__grid {
+      grid-template-columns: 1.4fr 1fr 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,104 @@
+---
+import { convention } from "../../data/convention";
+
+const { expect } = convention;
+---
+
+<section class="band" id="about">
+  <div class="wrap about">
+    <div class="rv">
+      <p class="eyebrow">The Convention</p>
+      <h2 class="display about__title">One gathering, four nights, one expectation.</h2>
+      <p class="lede">
+        Every year the whole house comes together &mdash; every branch, every department, every
+        generation &mdash; for four nights of worship, sound teaching and prayer. It is our reset
+        button: we lay down the year so far, we listen, and we go back out carrying something we
+        did not walk in with.
+      </p>
+      <p class="lede">
+        Bring your family. Bring the friend who has been meaning to come. There is no ticket, no
+        levy and no reserved seating &mdash; only room prepared for you.
+      </p>
+    </div>
+
+    <div class="rv">
+      <p class="eyebrow about__label">What to expect</p>
+      <ul class="expect">
+        {
+          expect.map((item) => (
+            <li>
+              <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              <span>
+                <strong>{item.t}</strong>
+                <em>{item.d}</em>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    gap: clamp(30px, 5vw, 60px);
+  }
+
+  .about__title {
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+    margin: 14px 0 18px;
+  }
+
+  .about__label {
+    margin-bottom: 18px;
+  }
+
+  .expect {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+  }
+
+  .expect li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .expect li:first-child {
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .tick {
+    width: 20px;
+    height: 20px;
+    margin-top: 3px;
+    color: var(--gold);
+  }
+
+  .expect strong {
+    display: block;
+    font-size: 0.98rem;
+  }
+
+  .expect em {
+    font-style: normal;
+    color: var(--dim);
+    font-size: 0.88rem;
+  }
+
+  @media (min-width: 900px) {
+    .about {
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: start;
+    }
+  }
+</style>

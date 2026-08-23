@@ -1,0 +1,85 @@
+---
+import { convention } from "../../data/convention";
+
+const { facts } = convention;
+---
+
+<section class="facts" aria-label="Key details">
+  <div class="wrap">
+    <dl class="facts__grid">
+      {
+        facts.map((fact) => (
+          <div class="fact">
+            <dt>{fact.k}</dt>
+            <dd>
+              {fact.v}
+              <span>{fact.s}</span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .facts {
+    border-block: 1px solid var(--line-soft);
+    background: var(--ink-2);
+  }
+
+  .facts__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0;
+  }
+
+  .fact {
+    padding: 26px 22px;
+    border-right: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .fact:nth-child(2n) {
+    border-right: none;
+  }
+
+  .fact dt {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .fact dd {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .fact dd span {
+    display: block;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+
+  @media (min-width: 760px) {
+    .facts__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .fact {
+      border-bottom: none;
+      border-right: 1px solid var(--line-soft);
+    }
+
+    .fact:last-child {
+      border-right: none;
+    }
+  }
+</style>

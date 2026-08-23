@@ -1,0 +1,54 @@
+/**
+ * Design tokens — the single source of truth for colour, type and spacing.
+ * Components reference these. No component may contain a raw hex value.
+ *
+ * The site commits to one visual world (a lit auditorium at night) rather than
+ * following the viewer's light/dark preference, so every value is painted
+ * explicitly and there is no light-theme override.
+ */
+
+:root {
+  /* ---- ground ---- */
+  --ink: #0b0d1a;
+  --ink-2: #101426;
+  --ink-3: #171c33;
+
+  /* ---- lines ---- */
+  --line: #242b49;
+  --line-soft: #1b2039;
+
+  /* ---- accent: candlelight ---- */
+  --gold: #e8b44a;
+  --gold-bright: #f7d693;
+  --gold-deep: #8c6520;
+  --on-gold: #221703;
+
+  /* ---- text ---- */
+  --halo: #f3eada;
+  --dim: #99a1bd;
+  --dimmer: #6e7699;
+
+  /* ---- semantic (dashboard only) ---- */
+  --good: #4ec9a0;
+  --warn: #e8b44a;
+  --bad: #e86a5a;
+
+  /* ---- type ---- */
+  --font-display: "Bodoni Moda", Georgia, "Times New Roman", serif;
+  --font-body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --step--1: 0.82rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: clamp(1.5rem, 3vw, 2rem);
+  --step-3: clamp(2rem, 5.6vw, 3.3rem);
+  --step-4: clamp(3.1rem, 13.5vw, 8.6rem);
+
+  /* ---- space & shape ---- */
+  --gutter: 22px;
+  --measure: 1140px;
+  --radius: 16px;
+  --radius-sm: 10px;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}

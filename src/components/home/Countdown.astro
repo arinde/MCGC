@@ -1,0 +1,105 @@
+---
+import { convention, toDate } from "../../data/convention";
+
+/**
+ * Counts down to the first session. The target is serialised as a timestamp so
+ * the client script never re-parses the date shape.
+ */
+const target = toDate(convention.starts).getTime();
+---
+
+<div class="countdown">
+  <p class="countdown__label" id="cd-label">Doors open in</p>
+  <div class="clock" id="clock" role="timer" aria-live="polite" data-target={target}>
+    <!-- Rendered server-side so the numbers are present before JS runs. -->
+    <noscript>The convention begins {convention.datesLabel}.</noscript>
+  </div>
+</div>
+
+<script>
+  const clock = document.getElementById("clock");
+  const label = document.getElementById("cd-label");
+
+  if (clock && label) {
+    const target = Number(clock.dataset.target);
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    const render = () => {
+      const remaining = target - Date.now();
+
+      if (remaining <= 0) {
+        label.textContent = "Happening now";
+        clock.innerHTML = '<span class="started">We’ve begun — come and join us.</span>';
+        clearInterval(timer);
+        return;
+      }
+
+      const units: [number, string][] = [
+        [Math.floor(remaining / 86_400_000), "days"],
+        [Math.floor(remaining / 3_600_000) % 24, "hours"],
+        [Math.floor(remaining / 60_000) % 60, "minutes"],
+        [Math.floor(remaining / 1000) % 60, "seconds"],
+      ];
+
+      clock.innerHTML = units
+        .map(([value, name]) => `<div class="unit"><b>${pad(value)}</b><small>${name}</small></div>`)
+        .join("");
+    };
+
+    render();
+    const timer = setInterval(render, 1000);
+  }
+</script>
+
+<style>
+  .countdown {
+    margin-top: 44px;
+  }
+
+  .countdown__label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dimmer);
+    margin: 0 0 14px;
+  }
+
+  .clock {
+    display: flex;
+    gap: clamp(14px, 4vw, 38px);
+    flex-wrap: wrap;
+    min-height: 4.2rem;
+  }
+
+  .clock :global(.unit) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .clock :global(.unit b) {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2.6rem, 9vw, 4.6rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--halo);
+  }
+
+  .clock :global(.unit small) {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 9px;
+  }
+
+  .clock :global(.started) {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1.15;
+  }
+</style>

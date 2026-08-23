@@ -1,17 +1,34 @@
 ---
+import Base from "../layouts/Base.astro";
+import { convention } from "../data/convention";
 
+import SiteNav from "../components/home/SiteNav.astro";
+import Hero from "../components/home/Hero.astro";
+import FactsStrip from "../components/home/FactsStrip.astro";
+import About from "../components/home/About.astro";
+import Schedule from "../components/home/Schedule.astro";
+import Ministers from "../components/home/Ministers.astro";
+import Register from "../components/home/Register.astro";
+import Venue from "../components/home/Venue.astro";
+import SiteFooter from "../components/home/SiteFooter.astro";
+import Reveal from "../components/Reveal.astro";
+
+const pageTitle = `${convention.title} ${convention.year} — ${convention.theme.join(" ")}`;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base title={pageTitle}>
+  <SiteNav />
+  <Hero />
+
+  <main id="main">
+    <FactsStrip />
+    <About />
+    <Schedule />
+    <Ministers />
+    <Register />
+    <Venue />
+  </main>
+
+  <SiteFooter />
+  <Reveal />
+</Base>

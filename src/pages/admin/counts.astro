@@ -1,0 +1,270 @@
+---
+import Admin from "../../layouts/Admin.astro";
+import Button from "../../components/Button.astro";
+import { convention, currentDayLabel } from "../../data/convention";
+import { getSupabase, isConfigured, logActivity } from "../../lib/supabase";
+
+// Accepts a POST from the headcount form.
+export const prerender = false;
+
+const today = currentDayLabel();
+let message = "";
+let isError = false;
+
+if (Astro.request.method === "POST" && isConfigured()) {
+  const form = await Astro.request.formData();
+  const dayLabel = String(form.get("dayLabel") ?? "");
+  const sessionTime = String(form.get("sessionTime") ?? "");
+  const headcount = Number(form.get("headcount"));
+  const countedBy = String(form.get("countedBy") ?? "").trim();
+
+  const day = convention.days.find((d) => d.label === dayLabel);
+  const session = day?.sessions.find((s) => s.time === sessionTime);
+
+  if (!day || !session || !Number.isFinite(headcount) || headcount < 0) {
+    message = "Pick a night and a session, and enter a number.";
+    isError = true;
+  } else {
+    const { error } = await getSupabase().from("session_counts").insert({
+      day_label: dayLabel,
+      session_time: sessionTime,
+      session_name: session.title,
+      headcount: Math.round(headcount),
+      counted_by: countedBy || null,
+    });
+
+    if (error) {
+      message = "Couldn’t save that count.";
+      isError = true;
+    } else {
+      await logActivity("count", `${headcount} counted at ${dayLabel} · ${session.title}`);
+      message = `Recorded: ${headcount} at ${session.title}.`;
+    }
+  }
+}
+
+let history: { day_label: string; session_time: string; session_name: string | null; headcount: number; counted_at: string }[] = [];
+
+if (isConfigured()) {
+  const { data } = await getSupabase()
+    .from("session_counts")
+    .select("day_label, session_time, session_name, headcount, counted_at")
+    .order("counted_at", { ascending: false })
+    .limit(25);
+  history = data ?? [];
+}
+
+const timeFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+---
+
+<Admin title="Headcounts" active="counts">
+  <p class="eyebrow">Per session</p>
+  <h1 class="display page-title">Headcounts</h1>
+  <p class="lede">
+    What the ushers actually counted in the room. Separate from check-in, which only sees people
+    who registered.
+  </p>
+
+  {message && <p class:list={["message", isError && "message--error"]} role="status">{message}</p>}
+
+  <form method="POST" class="count-form">
+    <div class="field">
+      <label for="dayLabel">Night</label>
+      <select id="dayLabel" name="dayLabel">
+        {
+          convention.days.map((day) => (
+            <option value={day.label} selected={day.label === today}>
+              {day.label} — {day.date}
+            </option>
+          ))
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="sessionTime">Session</label>
+      <select id="sessionTime" name="sessionTime">
+        {
+          convention.days.map((day) => (
+            <optgroup label={day.label}>
+              {day.sessions.map((session) => (
+                <option value={session.time}>
+                  {session.time} — {session.title}
+                </option>
+              ))}
+            </optgroup>
+          ))
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="headcount">Headcount</label>
+      <input type="number" id="headcount" name="headcount" min="0" step="1" required placeholder="0" />
+    </div>
+
+    <div class="field">
+      <label for="countedBy">Counted by</label>
+      <input type="text" id="countedBy" name="countedBy" placeholder="Usher's name" />
+    </div>
+
+    <Button type="submit" class="count-form__submit">Record count</Button>
+  </form>
+
+  <div class="panel">
+    <h2 class="panel__title">Recent counts</h2>
+    {
+      history.length === 0 ? (
+        <p class="empty">No counts recorded yet.</p>
+      ) : (
+        <ul class="history">
+          {history.map((entry) => (
+            <li>
+              <span class="history__count">{entry.headcount}</span>
+              <span>
+                <strong>{entry.session_name ?? entry.session_time}</strong>
+                <em>{entry.day_label} · {entry.session_time}</em>
+              </span>
+              <time>{timeFormat.format(new Date(entry.counted_at))}</time>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</Admin>
+
+<style>
+  .page-title {
+    font-size: 2.2rem;
+    margin: 10px 0 12px;
+  }
+
+  .message {
+    background: rgba(78, 201, 160, 0.1);
+    border: 1px solid var(--good);
+    color: var(--good);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    margin: 20px 0 0;
+  }
+
+  .message--error {
+    background: rgba(232, 106, 90, 0.1);
+    border-color: var(--bad);
+    color: var(--bad);
+  }
+
+  .count-form {
+    display: grid;
+    gap: 16px;
+    background: var(--ink-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin: 22px 0;
+    align-items: end;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    background: var(--ink-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--halo);
+    font-family: inherit;
+    font-size: 0.98rem;
+    padding: 12px 14px;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--gold);
+    outline: none;
+  }
+
+  .panel {
+    background: var(--ink-2);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+
+  .panel__title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin: 0 0 18px;
+  }
+
+  .history {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .history li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .history__count {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    min-width: 2.5ch;
+  }
+
+  .history strong {
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  .history em {
+    font-style: normal;
+    font-size: 0.8rem;
+    color: var(--dimmer);
+  }
+
+  .history time {
+    font-size: 0.78rem;
+    color: var(--dimmer);
+    white-space: nowrap;
+  }
+
+  .empty {
+    color: var(--dimmer);
+    margin: 0;
+  }
+
+  @media (min-width: 760px) {
+    .count-form {
+      grid-template-columns: 1fr 1.4fr 0.7fr 1fr auto;
+    }
+  }
+</style>
