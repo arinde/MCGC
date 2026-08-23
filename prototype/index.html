@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="MCGC Annual Convention 2026 — four nights of worship, teaching and encounter. Register free.">
+<title>MCGC Convention 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --ink:#0B0D1A;
+  --ink-2:#101426;
+  --ink-3:#171C33;
+  --line:#242B49;
+  --line-soft:#1B2039;
+  --gold:#E8B44A;
+  --gold-2:#F7D693;
+  --gold-deep:#8C6520;
+  --halo:#F3EADA;
+  --dim:#99A1BD;
+  --dimmer:#6E7699;
+  --maxw:1140px;
+  --r:16px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--halo);
+  font-family:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{ max-width:100%; display:block; }
+a{ color:var(--gold); }
+:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:4px; }
+
+/* ---------- type ---------- */
+.display{
+  font-family:"Bodoni Moda",Georgia,"Times New Roman",serif;
+  font-weight:900;
+  line-height:.92;
+  letter-spacing:-.015em;
+  text-wrap:balance;
+  margin:0;
+}
+.eyebrow{
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin:0;
+}
+.lede{ color:var(--dim); font-size:1.06rem; max-width:60ch; }
+
+/* ---------- shell ---------- */
+.wrap{ width:100%; max-width:var(--maxw); margin-inline:auto; padding-inline:22px; }
+section{ position:relative; }
+.band{ padding-block:clamp(64px,10vw,116px); }
+.band + .band{ border-top:1px solid var(--line-soft); }
+
+/* ---------- nav ---------- */
+.nav{
+  position:sticky; top:0; z-index:60;
+  background:rgba(11,13,26,.78);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;
+  transition:border-color .3s var(--ease);
+}
+.nav.stuck{ border-bottom-color:var(--line-soft); }
+.nav-in{ display:flex; align-items:center; gap:18px; height:64px; }
+.mark{
+  display:flex; align-items:center; gap:10px;
+  font-family:"Bodoni Moda",Georgia,serif; font-weight:900; font-size:1.12rem;
+  letter-spacing:.04em; color:var(--halo); text-decoration:none; flex:0 0 auto;
+}
+.mark span{ color:var(--gold); }
+.nav-links{ display:none; gap:26px; margin-left:auto; }
+.nav-links a{
+  color:var(--dim); text-decoration:none; font-size:.86rem; font-weight:600;
+  letter-spacing:.03em; transition:color .2s;
+}
+.nav-links a:hover{ color:var(--halo); }
+.nav .nav-cta{ margin-left:auto; }
+@media(min-width:880px){
+  .nav-links{ display:flex; }
+  .nav .nav-cta{ margin-left:26px; }
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  padding:12px 22px; border-radius:999px; border:1px solid transparent;
+  font-family:inherit; font-size:.9rem; font-weight:700; letter-spacing:.02em;
+  text-decoration:none; cursor:pointer; white-space:nowrap;
+  transition:transform .18s var(--ease), background .2s, border-color .2s, color .2s;
+}
+.btn:active{ transform:translateY(1px); }
+.btn-gold{ background:var(--gold); color:#221703; }
+.btn-gold:hover{ background:var(--gold-2); }
+.btn-ghost{ border-color:var(--line); color:var(--halo); background:transparent; }
+.btn-ghost:hover{ border-color:var(--gold); color:var(--gold); }
+.btn-sm{ padding:9px 17px; font-size:.82rem; }
+
+/* ---------- hero ---------- */
+.hero{ position:relative; overflow:hidden; padding-block:clamp(56px,11vw,110px) clamp(48px,8vw,88px); }
+#motes{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.shafts{ position:absolute; inset:-20% -10% auto -10%; height:130%; pointer-events:none; opacity:.55; }
+.shaft{
+  position:absolute; top:-30%; width:34vw; height:170%;
+  background:linear-gradient(to bottom, rgba(232,180,74,.16), rgba(232,180,74,.04) 42%, transparent 72%);
+  transform-origin:top center; filter:blur(22px);
+  animation:sway 14s ease-in-out infinite alternate;
+}
+.shaft:nth-child(1){ left:2%;  animation-delay:-2s; }
+.shaft:nth-child(2){ left:34%; opacity:.7; animation-delay:-6s; }
+.shaft:nth-child(3){ left:66%; opacity:.5; animation-delay:-9s; }
+@keyframes sway{
+  from{ transform:rotate(9deg)  translateX(-1.5vw); }
+  to  { transform:rotate(15deg) translateX(1.5vw); }
+}
+.hero::after{
+  content:""; position:absolute; left:50%; top:-30%; transform:translateX(-50%);
+  width:min(1000px,140vw); aspect-ratio:1; border-radius:50%;
+  background:radial-gradient(circle, rgba(232,180,74,.13), transparent 62%);
+  pointer-events:none;
+}
+.hero-in{ position:relative; z-index:2; }
+.hero .eyebrow{ margin-bottom:20px; }
+.hero h1{ font-size:clamp(3.1rem,13.5vw,8.6rem); }
+.hero h1 em{
+  display:block; font-style:italic; font-weight:400;
+  font-size:.42em; letter-spacing:.01em; color:var(--gold);
+  margin-top:.28em;
+}
+.verse{
+  margin:26px 0 0; padding-left:16px; border-left:2px solid var(--gold-deep);
+  font-family:"Bodoni Moda",Georgia,serif; font-style:italic;
+  font-size:clamp(1rem,2.4vw,1.22rem);
+  color:var(--halo); max-width:46ch; line-height:1.5;
+}
+.verse cite{
+  display:block; font-style:normal; font-family:"Manrope",sans-serif;
+  font-size:.74rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--dimmer); margin-top:10px;
+}
+.hero-cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:34px; }
+
+/* ---------- countdown ---------- */
+.countdown{ margin-top:44px; }
+.countdown-label{
+  font-size:.7rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--dimmer); margin:0 0 14px;
+}
+.clock{ display:flex; gap:clamp(14px,4vw,38px); flex-wrap:wrap; }
+.unit{ display:flex; flex-direction:column; }
+.unit b{
+  font-family:"Bodoni Moda",Georgia,serif; font-weight:900;
+  font-size:clamp(2.6rem,9vw,4.6rem); line-height:1;
+  font-variant-numeric:tabular-nums; color:var(--halo);
+}
+.unit small{
+  font-size:.66rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); margin-top:9px;
+}
+.started{
+  font-family:"Bodoni Moda",Georgia,serif; font-size:clamp(1.6rem,5vw,2.4rem);
+  font-weight:900; color:var(--gold); line-height:1.15;
+}
+
+/* ---------- facts strip ---------- */
+.facts{ border-block:1px solid var(--line-soft); background:var(--ink-2); }
+.facts-grid{ display:grid; grid-template-columns:1fr 1fr; margin:0; }
+@media(min-width:760px){ .facts-grid{ grid-template-columns:repeat(4,1fr); } }
+.fact{
+  padding:26px 22px;
+  border-right:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft);
+}
+.fact:nth-child(2n){ border-right:none; }
+@media(min-width:760px){
+  .fact{ border-bottom:none; border-right:1px solid var(--line-soft); }
+  .fact:last-child{ border-right:none; }
+}
+.fact dt{
+  font-size:.66rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:8px;
+}
+.fact dd{ margin:0; font-size:1.02rem; font-weight:700; line-height:1.35; }
+.fact dd span{ display:block; font-weight:500; font-size:.85rem; color:var(--dim); margin-top:3px; }
+
+/* ---------- section head ---------- */
+.head{ max-width:70ch; margin-bottom:clamp(34px,5vw,54px); }
+.head h2{ font-size:clamp(2rem,5.6vw,3.3rem); margin:14px 0 16px; }
+
+/* ---------- about ---------- */
+.about-grid{ display:grid; gap:clamp(30px,5vw,60px); }
+@media(min-width:900px){ .about-grid{ grid-template-columns:1.15fr .85fr; align-items:start; } }
+.about-grid h2{ font-size:clamp(1.9rem,5vw,2.9rem); margin:14px 0 18px; }
+.expect{ list-style:none; margin:0; padding:0; display:grid; }
+.expect li{
+  display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start;
+  padding:16px 0; border-bottom:1px solid var(--line-soft);
+}
+.expect li:first-child{ border-top:1px solid var(--line-soft); }
+.tick{ width:20px; height:20px; margin-top:3px; flex:0 0 auto; color:var(--gold); }
+.expect strong{ display:block; font-size:.98rem; }
+.expect em{ font-style:normal; color:var(--dim); font-size:.88rem; }
+
+/* ---------- schedule ---------- */
+.tabs{ display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:26px; scrollbar-width:none; }
+.tabs::-webkit-scrollbar{ display:none; }
+.tab{
+  flex:0 0 auto; background:transparent; border:1px solid var(--line);
+  color:var(--dim); padding:11px 18px; border-radius:999px; cursor:pointer;
+  font-family:inherit; font-size:.85rem; font-weight:700; letter-spacing:.02em;
+  transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.tab:hover{ color:var(--halo); border-color:var(--dimmer); }
+.tab[aria-selected="true"]{ background:var(--gold); border-color:var(--gold); color:#221703; }
+.day-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:12px; margin-bottom:20px; }
+.day-head h3{
+  font-family:"Bodoni Moda",Georgia,serif; font-weight:900;
+  font-size:clamp(1.5rem,4vw,2.1rem); margin:0;
+}
+.day-head .when{
+  font-size:.8rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--gold);
+}
+.sessions{ list-style:none; margin:0; padding:0; }
+.sessions li{
+  display:grid; gap:4px 22px; padding:20px 0;
+  border-top:1px solid var(--line-soft); grid-template-columns:1fr;
+}
+@media(min-width:640px){ .sessions li{ grid-template-columns:112px 1fr; } }
+.sessions li:last-child{ border-bottom:1px solid var(--line-soft); }
+.s-time{
+  font-size:.82rem; font-weight:800; letter-spacing:.06em; color:var(--gold);
+  font-variant-numeric:tabular-nums; padding-top:3px;
+}
+.s-title{ font-size:1.06rem; font-weight:700; margin:0; }
+.s-who{ font-size:.88rem; color:var(--dim); margin:2px 0 0; }
+.s-tag{
+  display:inline-block; margin-top:8px; font-size:.64rem; font-weight:800;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--gold);
+  border:1px solid var(--gold-deep); padding:3px 9px; border-radius:999px;
+}
+
+/* ---------- ministers ---------- */
+.people{ display:grid; gap:18px; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); }
+.person{
+  background:var(--ink-2); border:1px solid var(--line-soft); border-radius:var(--r);
+  padding:24px; transition:border-color .25s var(--ease), transform .25s var(--ease);
+}
+.person:hover{ border-color:var(--gold-deep); transform:translateY(-3px); }
+.mono{
+  width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
+  font-family:"Bodoni Moda",Georgia,serif; font-weight:900; font-size:1.35rem;
+  color:var(--gold); background:var(--ink-3); border:1px solid var(--gold-deep);
+  margin-bottom:18px; overflow:hidden;
+}
+.mono img{ width:100%; height:100%; object-fit:cover; }
+.person h3{ margin:0; font-size:1.08rem; font-weight:800; line-height:1.3; }
+.person .role{ margin:5px 0 0; font-size:.83rem; color:var(--gold); font-weight:700; letter-spacing:.04em; }
+.person .org{ margin:9px 0 0; font-size:.86rem; color:var(--dim); }
+.person .slots{
+  margin:14px 0 0; padding-top:14px; border-top:1px solid var(--line-soft);
+  font-size:.76rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--dimmer);
+}
+
+/* ---------- register ---------- */
+.register{ background:var(--ink-2); }
+.reg-grid{ display:grid; gap:clamp(30px,5vw,56px); }
+@media(min-width:940px){ .reg-grid{ grid-template-columns:.85fr 1.15fr; align-items:start; } }
+.form-card{
+  background:var(--ink); border:1px solid var(--line); border-radius:var(--r);
+  padding:clamp(22px,4vw,34px);
+}
+.field{ margin-bottom:18px; }
+.field label{
+  display:block; font-size:.72rem; font-weight:800; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--dim); margin-bottom:8px;
+}
+.field .plain{ text-transform:none; letter-spacing:0; font-weight:500; }
+.field input[type=text],.field input[type=tel],.field input[type=email],.field select{
+  width:100%; background:var(--ink-3); border:1px solid var(--line); border-radius:10px;
+  color:var(--halo); font-family:inherit; font-size:.98rem; padding:13px 15px;
+  transition:border-color .2s;
+}
+.field input:focus,.field select:focus{ border-color:var(--gold); outline:none; }
+.field input::placeholder{ color:var(--dimmer); }
+.row2{ display:grid; gap:18px; }
+@media(min-width:560px){ .row2{ grid-template-columns:1fr 1fr; } }
+.chips{ display:flex; flex-wrap:wrap; gap:9px; }
+.chip{ position:relative; }
+.chip input{ position:absolute; inset:0; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
+.chip span{
+  display:block; padding:9px 16px; border-radius:999px; border:1px solid var(--line);
+  font-size:.83rem; font-weight:700; color:var(--dim);
+  transition:background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
+}
+.chip input:checked + span{ background:var(--gold); border-color:var(--gold); color:#221703; }
+.chip input:focus-visible + span{ outline:2px solid var(--gold); outline-offset:2px; }
+.form-note{ font-size:.8rem; color:var(--dimmer); margin:16px 0 0; line-height:1.6; }
+.form-note.alert{ color:var(--gold); }
+.reg-actions{ display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; }
+.confirm{
+  display:none; border:1px solid var(--gold-deep); background:rgba(232,180,74,.07);
+  border-radius:var(--r); padding:22px; margin-bottom:22px;
+}
+.confirm.show{ display:block; }
+.confirm h3{ margin:0 0 8px; font-family:"Bodoni Moda",Georgia,serif; font-size:1.3rem; color:var(--gold); }
+.confirm p{ margin:0; font-size:.9rem; color:var(--dim); }
+.why{ list-style:none; margin:22px 0 0; padding:0; display:grid; gap:16px; }
+.why li{ display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; }
+.why .n{
+  font-family:"Bodoni Moda",Georgia,serif; font-weight:900; font-size:.95rem; color:var(--gold);
+  border:1px solid var(--gold-deep); border-radius:50%; width:30px; height:30px;
+  display:grid; place-items:center; flex:0 0 auto;
+}
+.why strong{ display:block; font-size:.98rem; }
+.why em{ font-style:normal; color:var(--dim); font-size:.87rem; }
+
+/* ---------- venue ---------- */
+.venue-grid{ display:grid; gap:clamp(28px,5vw,50px); }
+@media(min-width:900px){ .venue-grid{ grid-template-columns:1fr 1fr; align-items:center; } }
+.map-card{
+  border:1px solid var(--line); border-radius:var(--r);
+  background:var(--ink-2); overflow:hidden; aspect-ratio:4/3;
+}
+.map-card svg{ width:100%; height:100%; display:block; }
+.addr{ font-size:1.06rem; line-height:1.7; margin:0; }
+.addr strong{
+  display:block; font-family:"Bodoni Moda",Georgia,serif;
+  font-size:1.4rem; font-weight:900; margin-bottom:6px; line-height:1.2;
+}
+.addr .near{ color:var(--dim); font-size:.92rem; }
+.getting{ list-style:none; margin:26px 0 0; padding:0; display:grid; gap:14px; }
+.getting li{ display:grid; grid-template-columns:auto 1fr; gap:13px; font-size:.92rem; color:var(--dim); }
+.getting svg{ width:18px; height:18px; color:var(--gold); margin-top:3px; flex:0 0 auto; }
+.venue-cta{ margin-top:28px; }
+
+/* ---------- footer ---------- */
+footer{ border-top:1px solid var(--line-soft); background:var(--ink-2); padding-block:52px 40px; }
+.foot-grid{ display:grid; gap:34px; }
+@media(min-width:760px){ .foot-grid{ grid-template-columns:1.4fr 1fr 1fr; } }
+footer h4{
+  font-size:.7rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); margin:0 0 14px;
+}
+footer p, footer .flink{ font-size:.9rem; color:var(--dim); text-decoration:none; margin:0 0 8px; display:block; }
+footer .flink:hover{ color:var(--halo); }
+.foot-mark{ margin-bottom:14px; }
+.colophon{
+  margin-top:40px; padding-top:22px; border-top:1px solid var(--line-soft);
+  display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between;
+  font-size:.78rem; color:var(--dimmer);
+}
+
+/* ---------- reveal ---------- */
+.rv{ opacity:0; transform:translateY(22px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+.rv.in{ opacity:1; transform:none; }
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  html{ scroll-behavior:auto; }
+  .rv{ opacity:1; transform:none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="mark" href="#top">MC<span>G</span>C</a>
+    <div class="nav-links">
+      <a href="#about">The Convention</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#ministers">Ministering</a>
+      <a href="#venue">Venue</a>
+    </div>
+    <a class="btn btn-gold btn-sm nav-cta" href="#register">Register free</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="shafts" aria-hidden="true"><i class="shaft"></i><i class="shaft"></i><i class="shaft"></i></div>
+  <canvas id="motes" aria-hidden="true"></canvas>
+  <div class="wrap hero-in">
+    <p class="eyebrow rv" id="heroEyebrow">MCGC Annual Convention &middot; 2026</p>
+    <h1 class="display rv" id="heroTitle">GREATER<br>GLORY<em>four nights of encounter</em></h1>
+    <blockquote class="verse rv" id="heroVerse">
+      &ldquo;The glory of this present house will be greater than the glory of the former house.&rdquo;
+      <cite>Haggai 2:9</cite>
+    </blockquote>
+    <div class="hero-cta rv">
+      <a class="btn btn-gold" href="#register">Register free</a>
+      <a class="btn btn-ghost" href="#schedule">See the schedule</a>
+    </div>
+    <div class="countdown rv">
+      <p class="countdown-label" id="cdLabel">Doors open in</p>
+      <div class="clock" id="clock" role="timer" aria-live="polite"></div>
+    </div>
+  </div>
+</header>
+
+<section class="facts" aria-label="Key details">
+  <div class="wrap">
+    <dl class="facts-grid" id="factsGrid"></dl>
+  </div>
+</section>
+
+<section class="band" id="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="rv">
+        <p class="eyebrow">The Convention</p>
+        <h2 class="display">One gathering, four nights, one expectation.</h2>
+        <p class="lede" id="aboutBody">Every year the whole house comes together &mdash; every branch, every department, every generation &mdash; for four nights of worship, sound teaching and prayer. It is our reset button: we lay down the year so far, we listen, and we go back out carrying something we did not walk in with.</p>
+        <p class="lede">Bring your family. Bring the friend who has been meaning to come. There is no ticket, no levy and no reserved seating &mdash; only room prepared for you.</p>
+      </div>
+      <div class="rv">
+        <p class="eyebrow" style="margin-bottom:18px">What to expect</p>
+        <ul class="expect" id="expectList"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="schedule">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">Programme</p>
+      <h2 class="display">Four nights, night by night.</h2>
+      <p class="lede">Tap a day to see its full order of service. Doors open thirty minutes before each session.</p>
+    </div>
+    <div class="rv">
+      <div class="tabs" role="tablist" aria-label="Convention days" id="tabs"></div>
+      <div id="panels"></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="ministers">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">Ministering</p>
+      <h2 class="display">Who is coming to serve us.</h2>
+      <p class="lede">Guest ministers, our own pastorate and the convention choir &mdash; each carrying a piece of the week.</p>
+    </div>
+    <div class="people rv" id="people"></div>
+  </div>
+</section>
+
+<section class="band register" id="register">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">Registration</p>
+      <h2 class="display">Tell us you&rsquo;re coming.</h2>
+      <p class="lede">Registration is free. It simply helps us set out enough seats, print enough handouts and plan the children&rsquo;s programme.</p>
+    </div>
+    <div class="reg-grid">
+      <div class="rv">
+        <ul class="why">
+          <li><span class="n">1</span><span><strong>We save you a seat</strong><em>Numbers go to the ushering team the morning of each night.</em></span></li>
+          <li><span class="n">2</span><span><strong>Children are catered for</strong><em>Tell us you&rsquo;re bringing them and the children&rsquo;s church plans around it.</em></span></li>
+          <li><span class="n">3</span><span><strong>You get the reminders</strong><em>A short message the day before, and nothing else. We don&rsquo;t share your details.</em></span></li>
+        </ul>
+      </div>
+      <div class="rv">
+        <div class="confirm" id="confirm" role="status">
+          <h3 id="confirmHead">You&rsquo;re registered &mdash; see you there.</h3>
+          <p id="confirmBody"></p>
+        </div>
+        <form class="form-card" id="regForm" novalidate>
+          <div class="field">
+            <label for="f-name">Full name</label>
+            <input type="text" id="f-name" name="name" placeholder="First and last name" autocomplete="name">
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="f-phone">Phone (WhatsApp)</label>
+              <input type="tel" id="f-phone" name="phone" placeholder="0803 000 0000" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="f-email">Email <span class="plain">(optional)</span></label>
+              <input type="email" id="f-email" name="email" placeholder="you@email.com" autocomplete="email">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="f-branch">Branch / church</label>
+              <input type="text" id="f-branch" name="branch" placeholder="e.g. Headquarters" autocomplete="organization">
+            </div>
+            <div class="field">
+              <label for="f-guests">Coming with how many?</label>
+              <select id="f-guests" name="guests">
+                <option value="Just me">Just me</option>
+                <option value="Me + 1">Me + 1</option>
+                <option value="Me + 2">Me + 2</option>
+                <option value="Me + 3">Me + 3</option>
+                <option value="Me + 4 or more">Me + 4 or more</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label id="daysLabel">Which nights will you join?</label>
+            <div class="chips" id="dayChips" role="group" aria-labelledby="daysLabel"></div>
+          </div>
+          <div class="field">
+            <label id="notesLabel">Anything we should know?</label>
+            <div class="chips" role="group" aria-labelledby="notesLabel">
+              <label class="chip"><input type="checkbox" name="flag" value="First-time guest"><span>First time here</span></label>
+              <label class="chip"><input type="checkbox" name="flag" value="Bringing children"><span>Bringing children</span></label>
+              <label class="chip"><input type="checkbox" name="flag" value="Needs transport"><span>Need transport</span></label>
+              <label class="chip"><input type="checkbox" name="flag" value="Accessible seating"><span>Accessible seating</span></label>
+            </div>
+          </div>
+          <div class="reg-actions">
+            <button type="submit" class="btn btn-gold">Send my registration</button>
+            <button type="button" class="btn btn-ghost" id="copyBtn">Copy my details</button>
+          </div>
+          <p class="form-note" id="formNote">Opens WhatsApp with your details already written out &mdash; you&rsquo;ll see the message before it sends.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="venue">
+  <div class="wrap">
+    <div class="head rv">
+      <p class="eyebrow">Getting there</p>
+      <h2 class="display">Where we&rsquo;re meeting.</h2>
+    </div>
+    <div class="venue-grid">
+      <div class="map-card rv">
+        <svg viewBox="0 0 400 300" role="img" aria-label="Stylised map showing the venue location">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0 L0 0 0 40" fill="none" stroke="#242B49" stroke-width="1"/>
+            </pattern>
+            <radialGradient id="glow">
+              <stop offset="0%" stop-color="#E8B44A" stop-opacity=".35"/>
+              <stop offset="100%" stop-color="#E8B44A" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="400" height="300" fill="#101426"/>
+          <rect width="400" height="300" fill="url(#grid)"/>
+          <path d="M0 205 L400 175" stroke="#242B49" stroke-width="9" fill="none"/>
+          <path d="M150 0 L178 300" stroke="#242B49" stroke-width="7" fill="none"/>
+          <path d="M0 80 L400 60" stroke="#1B2039" stroke-width="5" fill="none"/>
+          <circle cx="200" cy="150" r="88" fill="url(#glow)"/>
+          <path d="M200 124 c-14 0 -25 11 -25 25 c0 18 25 40 25 40 s25 -22 25 -40 c0 -14 -11 -25 -25 -25 z" fill="#E8B44A"/>
+          <circle cx="200" cy="148" r="9" fill="#101426"/>
+        </svg>
+      </div>
+      <div class="rv">
+        <p class="addr" id="venueAddr"></p>
+        <ul class="getting" id="gettingList"></ul>
+        <div class="venue-cta">
+          <a class="btn btn-gold" id="mapsBtn" href="#" target="_blank" rel="noopener">Open in Google Maps</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="mark foot-mark" href="#top">MC<span>G</span>C</a>
+        <p id="footBlurb">The annual convention of MCGC. Everyone is welcome &mdash; come as you are.</p>
+      </div>
+      <div>
+        <h4>Convention desk</h4>
+        <a class="flink" id="footPhone" href="#">&nbsp;</a>
+        <a class="flink" id="footEmail" href="#">&nbsp;</a>
+      </div>
+      <div>
+        <h4>Share it</h4>
+        <a class="flink" href="#" id="shareWa">Send on WhatsApp</a>
+        <a class="flink" href="#" id="shareCopy">Copy the link</a>
+      </div>
+    </div>
+    <div class="colophon">
+      <span id="footCopy">&copy; 2026 MCGC</span>
+      <span>Come expecting.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   EDIT EVERYTHING IN THIS BLOCK — nothing below it needs touching.
+   ===================================================================== */
+const CONVENTION = {
+
+  church:      "MCGC",                       // <- full church name goes here
+  title:       "MCGC Annual Convention",
+  year:        "2026",
+  theme:       ["GREATER", "GLORY"],         // hero headline, one word per line
+  tagline:     "four nights of encounter",
+  verse:       "The glory of this present house will be greater than the glory of the former house.",
+  verseRef:    "Haggai 2:9",
+
+  // First session starts — y, m (1-12), d, hh (24h), mm
+  starts:      { y:2026, m:8, d:27, hh:17, mm:0 },
+  datesLabel:  "Thu 27 – Sun 30 August 2026",
+
+  venue: {
+    name:     "Church Auditorium",
+    address:  "123 Convention Way, Ikeja, Lagos",
+    landmark: "Opposite the state secretariat",
+    maps:     "MCGC Church Auditorium Ikeja Lagos",   // Google Maps search text
+    getting: [
+      "Free parking in the school compound next door, from 4:00 PM.",
+      "Shuttle buses run from the main bus stop every 20 minutes.",
+      "Wheelchair access and reserved seating are on the left aisle."
+    ]
+  },
+
+  contact: {
+    whatsapp: "2348000000000",     // international format, no + and no spaces
+    display:  "+234 800 000 0000",
+    email:    "convention@mcgc.org"
+  },
+
+  facts: [
+    { k:"Dates",     v:"27 – 30 August",    s:"Thursday to Sunday" },
+    { k:"Venue",     v:"Church Auditorium", s:"Ikeja, Lagos" },
+    { k:"Sessions",  v:"7 services",        s:"Nightly + Sunday" },
+    { k:"Admission", v:"Free",              s:"No ticket needed" }
+  ],
+
+  expect: [
+    { t:"Worship that takes its time", d:"The convention choir and a live band, every night." },
+    { t:"Teaching you can use Monday", d:"Four sessions built on one theme, with handouts." },
+    { t:"Prayer and ministration",     d:"Personal prayer at the altar after every session." },
+    { t:"Children's convention",       d:"Ages 3–12, running parallel in the annexe." },
+    { t:"Communion & thanksgiving",    d:"Closing Sunday, one service, everybody together." }
+  ],
+
+  days: [
+    { label:"Day 1", date:"Thu · 27 Aug", title:"Opening Night", sub:"The Former House",
+      sessions:[
+        { time:"5:00 PM", title:"Doors open · Praise & worship", who:"Convention Choir" },
+        { time:"6:00 PM", title:"Opening charge",                who:"Host Pastor", tag:"Opening" },
+        { time:"7:15 PM", title:"Ministration & altar prayer",   who:"Guest Minister I" }
+      ]},
+    { label:"Day 2", date:"Fri · 28 Aug", title:"Second Night", sub:"Rebuilding",
+      sessions:[
+        { time:"5:00 PM", title:"Praise & worship",   who:"Convention Choir" },
+        { time:"6:00 PM", title:"Teaching session I", who:"Guest Minister II" },
+        { time:"7:30 PM", title:"Corporate prayer",   who:"Prayer Department" }
+      ]},
+    { label:"Day 3", date:"Sat · 29 Aug", title:"Third Night", sub:"The Latter Glory",
+      sessions:[
+        { time:"9:00 AM", title:"Workers' & leaders' session", who:"Host Pastor", tag:"Workers only" },
+        { time:"5:00 PM", title:"Praise & worship",            who:"Convention Choir" },
+        { time:"6:00 PM", title:"Teaching session II",         who:"Guest Minister I" },
+        { time:"7:45 PM", title:"Night of encounter",          who:"All ministers", tag:"Late night" }
+      ]},
+    { label:"Day 4", date:"Sun · 30 Aug", title:"Grand Finale", sub:"Peace In This Place",
+      sessions:[
+        { time:"8:30 AM",  title:"Thanksgiving procession",      who:"Whole church" },
+        { time:"9:30 AM",  title:"Convention finale service",    who:"Guest Minister II", tag:"Finale" },
+        { time:"11:30 AM", title:"Holy communion & benediction", who:"Host Pastor" },
+        { time:"12:30 PM", title:"Love feast",                   who:"Hospitality team" }
+      ]}
+  ],
+
+  ministers: [
+    { name:"Guest Minister I",  role:"Guest Speaker", org:"Ministry / church name", slots:"Night 1 · Night 3", photo:"" },
+    { name:"Guest Minister II", role:"Guest Speaker", org:"Ministry / church name", slots:"Night 2 · Finale",  photo:"" },
+    { name:"Host Pastor",       role:"Host",          org:"MCGC",                   slots:"Opening · Workers · Communion", photo:"" },
+    { name:"Convention Choir",  role:"Worship",       org:"MCGC Music Department",  slots:"Every session", photo:"" }
+  ],
+
+  // Optional: a Formspree / Google Apps Script URL to collect registrations into a
+  // spreadsheet. Leave "" to hand off to WhatsApp instead. Only works on the
+  // self-hosted copy — the published link always uses WhatsApp.
+  formEndpoint: ""
+};
+/* ==================== end of editable block ==================== */
+
+(function(){
+  "use strict";
+  var C = CONVENTION;
+  function $(s){ return document.querySelector(s); }
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+
+  /* ---- hero ---- */
+  $("#heroEyebrow").textContent = C.title + " · " + C.year;
+  $("#heroTitle").innerHTML = C.theme.map(esc).join("<br>") + "<em>" + esc(C.tagline) + "</em>";
+  $("#heroVerse").innerHTML = "&ldquo;" + esc(C.verse) + "&rdquo;<cite>" + esc(C.verseRef) + "</cite>";
+  document.title = C.church + " Convention " + C.year;
+
+  /* ---- facts ---- */
+  $("#factsGrid").innerHTML = C.facts.map(function(f){
+    return '<div class="fact"><dt>' + esc(f.k) + "</dt><dd>" + esc(f.v) +
+           "<span>" + esc(f.s) + "</span></dd></div>";
+  }).join("");
+
+  /* ---- what to expect ---- */
+  var TICK = '<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  $("#expectList").innerHTML = C.expect.map(function(e){
+    return "<li>" + TICK + "<span><strong>" + esc(e.t) + "</strong><em>" + esc(e.d) + "</em></span></li>";
+  }).join("");
+
+  /* ---- countdown ---- */
+  var start = new Date(C.starts.y, C.starts.m - 1, C.starts.d, C.starts.hh, C.starts.mm, 0);
+  var clock = $("#clock"), cdLabel = $("#cdLabel"), timer;
+  function pad(n){ return n < 10 ? "0" + n : String(n); }
+  function tick(){
+    var diff = start - Date.now();
+    if (diff <= 0){
+      cdLabel.textContent = "Happening now";
+      clock.innerHTML = '<span class="started">We&rsquo;ve begun &mdash; come and join us.</span>';
+      clearInterval(timer);
+      return;
+    }
+    var d = Math.floor(diff / 864e5),
+        h = Math.floor(diff / 36e5) % 24,
+        m = Math.floor(diff / 6e4) % 60,
+        s = Math.floor(diff / 1e3) % 60;
+    clock.innerHTML = [[d,"days"],[h,"hours"],[m,"minutes"],[s,"seconds"]].map(function(u){
+      return '<div class="unit"><b>' + pad(u[0]) + "</b><small>" + u[1] + "</small></div>";
+    }).join("");
+  }
+  tick();
+  timer = setInterval(tick, 1000);
+
+  /* ---- schedule tabs ---- */
+  var tabs = $("#tabs"), panels = $("#panels");
+  tabs.innerHTML = C.days.map(function(d, i){
+    return '<button type="button" class="tab" role="tab" id="tab-' + i + '" aria-controls="panel-' + i +
+           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '">' + esc(d.label) + "</button>";
+  }).join("");
+  panels.innerHTML = C.days.map(function(d, i){
+    return '<div role="tabpanel" id="panel-' + i + '" aria-labelledby="tab-' + i + '"' + (i ? " hidden" : "") + ">" +
+      '<div class="day-head"><h3>' + esc(d.title) + '</h3><span class="when">' +
+        esc(d.date) + " &middot; " + esc(d.sub) + "</span></div>" +
+      '<ul class="sessions">' + d.sessions.map(function(s){
+        return "<li><div class=\"s-time\">" + esc(s.time) + "</div><div>" +
+          '<p class="s-title">' + esc(s.title) + "</p>" +
+          '<p class="s-who">' + esc(s.who) + "</p>" +
+          (s.tag ? '<span class="s-tag">' + esc(s.tag) + "</span>" : "") +
+          "</div></li>";
+      }).join("") + "</ul></div>";
+  }).join("");
+
+  var tabEls = Array.prototype.slice.call(tabs.querySelectorAll(".tab"));
+  function select(i){
+    tabEls.forEach(function(t, j){
+      var on = i === j;
+      t.setAttribute("aria-selected", on);
+      t.tabIndex = on ? 0 : -1;
+      panels.children[j].hidden = !on;
+    });
+  }
+  tabs.addEventListener("click", function(e){
+    var t = e.target.closest(".tab");
+    if (t) select(tabEls.indexOf(t));
+  });
+  tabs.addEventListener("keydown", function(e){
+    var i = tabEls.indexOf(document.activeElement), n = null;
+    if (i < 0) return;
+    if (e.key === "ArrowRight") n = (i + 1) % tabEls.length;
+    if (e.key === "ArrowLeft")  n = (i - 1 + tabEls.length) % tabEls.length;
+    if (e.key === "Home") n = 0;
+    if (e.key === "End")  n = tabEls.length - 1;
+    if (n !== null){ e.preventDefault(); select(n); tabEls[n].focus(); }
+  });
+
+  /* ---- ministers ---- */
+  function initials(n){
+    return n.split(/\s+/).filter(function(w){ return /[A-Za-z]/.test(w); })
+            .slice(0, 2).map(function(w){ return w[0].toUpperCase(); }).join("");
+  }
+  $("#people").innerHTML = C.ministers.map(function(p){
+    return '<article class="person"><div class="mono">' +
+      (p.photo ? '<img src="' + esc(p.photo) + '" alt="' + esc(p.name) + '">' : esc(initials(p.name))) +
+      "</div><h3>" + esc(p.name) + "</h3>" +
+      '<p class="role">' + esc(p.role) + "</p>" +
+      (p.org ? '<p class="org">' + esc(p.org) + "</p>" : "") +
+      '<p class="slots">' + esc(p.slots) + "</p></article>";
+  }).join("");
+
+  /* ---- venue ---- */
+  var V = C.venue;
+  $("#venueAddr").innerHTML = "<strong>" + esc(V.name) + "</strong>" + esc(V.address) +
+    (V.landmark ? '<br><span class="near">' + esc(V.landmark) + "</span>" : "");
+  var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  $("#gettingList").innerHTML = V.getting.map(function(g){
+    return "<li>" + PIN + "<span>" + esc(g) + "</span></li>";
+  }).join("");
+  $("#mapsBtn").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(V.maps);
+
+  /* ---- day chips ---- */
+  $("#dayChips").innerHTML = C.days.map(function(d, i){
+    return '<label class="chip"><input type="checkbox" name="day" value="' +
+      esc(d.label + " (" + d.date + ")") + '"' + (i === 0 ? " checked" : "") +
+      '><span>' + esc(d.label) + "</span></label>";
+  }).join("") + '<label class="chip"><input type="checkbox" name="day" value="All four days"><span>All four</span></label>';
+
+  /* ---- footer ---- */
+  $("#footBlurb").textContent = "The annual convention of " + C.church + ". Everyone is welcome — come as you are.";
+  var fp = $("#footPhone"); fp.textContent = C.contact.display; fp.href = "tel:+" + C.contact.whatsapp;
+  var fe = $("#footEmail"); fe.textContent = C.contact.email;   fe.href = "mailto:" + C.contact.email;
+  $("#footCopy").innerHTML = "&copy; " + esc(C.year) + " " + esc(C.church);
+
+  /* ---- registration ---- */
+  var form = $("#regForm"), confirmBox = $("#confirm"),
+      confirmHead = $("#confirmHead"), confirmBody = $("#confirmBody"),
+      note = $("#formNote"),
+      NOTE_DEFAULT = "Opens WhatsApp with your details already written out — you’ll see the message before it sends.";
+
+  function collect(){
+    var fd = new FormData(form);
+    return {
+      name:   String(fd.get("name")   || "").trim(),
+      phone:  String(fd.get("phone")  || "").trim(),
+      email:  String(fd.get("email")  || "").trim(),
+      branch: String(fd.get("branch") || "").trim(),
+      guests: String(fd.get("guests") || ""),
+      days:   fd.getAll("day"),
+      flags:  fd.getAll("flag")
+    };
+  }
+
+  function compose(r){
+    var L = ["*" + C.title + " " + C.year + " — Registration*", ""];
+    L.push("Name: " + r.name);
+    L.push("Phone: " + r.phone);
+    if (r.email)  L.push("Email: " + r.email);
+    if (r.branch) L.push("Branch: " + r.branch);
+    L.push("Coming: " + r.guests);
+    L.push("Attending: " + (r.days.length ? r.days.join(", ") : "Not stated"));
+    if (r.flags.length) L.push("Notes: " + r.flags.join(", "));
+    return L.join("\n");
+  }
+
+  function firstProblem(r){
+    if (!r.name)  return { el:"#f-name",  msg:"Please enter your name so we know who to expect." };
+    if (!r.phone) return { el:"#f-phone", msg:"We need a phone number to send you the reminder." };
+    return null;
+  }
+
+  function remember(r){
+    try { localStorage.setItem("mcgc-reg", JSON.stringify({ name:r.name, days:r.days })); } catch(e){}
+  }
+
+  function showConfirm(r){
+    confirmHead.innerHTML = "You&rsquo;re registered &mdash; see you there.";
+    confirmBody.textContent = r.days.length
+      ? "We have you down for " + r.days.join(", ") + ". Doors open 30 minutes before each session."
+      : "We have you down. Doors open 30 minutes before each session.";
+    confirmBox.classList.add("show");
+    confirmBox.scrollIntoView({ behavior:"smooth", block:"center" });
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var r = collect(), bad = firstProblem(r);
+    if (bad){
+      note.textContent = bad.msg;
+      note.classList.add("alert");
+      $(bad.el).focus();
+      return;
+    }
+    note.classList.remove("alert");
+    note.textContent = NOTE_DEFAULT;
+
+    function handoff(){
+      var a = document.createElement("a");
+      a.href = "https://wa.me/" + C.contact.whatsapp + "?text=" + encodeURIComponent(compose(r));
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      remember(r);
+      showConfirm(r);
+    }
+
+    if (C.formEndpoint){
+      fetch(C.formEndpoint, {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(r)
+      }).then(function(){
+        remember(r);
+        showConfirm(r);
+        form.reset();
+      })["catch"](handoff);
+      return;
+    }
+    handoff();
+  });
+
+  $("#copyBtn").addEventListener("click", function(){
+    var btn = this, text = compose(collect()).replace(/\*/g, "");
+    function done(label){
+      btn.textContent = label;
+      setTimeout(function(){ btn.textContent = "Copy my details"; }, 2200);
+    }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done("Copied"); }
+      catch(e){ done("Press Ctrl+C"); }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ done("Copied"); })["catch"](fallback);
+    } else fallback();
+  });
+
+  /* returning visitor */
+  try {
+    var saved = JSON.parse(localStorage.getItem("mcgc-reg") || "null");
+    if (saved && saved.name){
+      confirmHead.textContent = "Welcome back, " + saved.name.split(" ")[0] + ".";
+      confirmBody.textContent = "You already registered. Send it again below if anything has changed.";
+      confirmBox.classList.add("show");
+    }
+  } catch(e){}
+
+  /* ---- share ---- */
+  var shareText = C.title + " " + C.year + " — " + C.theme.join(" ") + ". " +
+                  C.datesLabel + ", " + C.venue.name + ". ";
+  $("#shareWa").addEventListener("click", function(e){
+    e.preventDefault();
+    window.open("https://wa.me/?text=" + encodeURIComponent(shareText + location.href), "_blank", "noopener");
+  });
+  $("#shareCopy").addEventListener("click", function(e){
+    e.preventDefault();
+    var el = this;
+    function done(label){
+      el.textContent = label;
+      setTimeout(function(){ el.textContent = "Copy the link"; }, 2200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(location.href).then(function(){ done("Link copied"); })
+        ["catch"](function(){ done(location.href); });
+    } else done(location.href);
+  });
+
+  /* ---- nav shadow + reveals ---- */
+  var nav = $("#nav");
+  addEventListener("scroll", function(){
+    nav.classList.toggle("stuck", window.scrollY > 12);
+  }, { passive:true });
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  }, { rootMargin:"0px 0px -8% 0px", threshold:.08 });
+  Array.prototype.forEach.call(document.querySelectorAll(".rv"), function(el, i){
+    el.style.transitionDelay = Math.min(i, 5) * 60 + "ms";
+    io.observe(el);
+  });
+
+  /* ---- dust motes ---- */
+  var cv = $("#motes");
+  if (cv && cv.getContext && !matchMedia("(prefers-reduced-motion: reduce)").matches){
+    var ctx = cv.getContext("2d"), w = 0, h = 0, motes = [], raf = 0, dpr = Math.min(devicePixelRatio || 1, 2);
+    function size(){
+      var r = cv.parentElement.getBoundingClientRect();
+      w = cv.width  = Math.max(1, Math.round(r.width  * dpr));
+      h = cv.height = Math.max(1, Math.round(r.height * dpr));
+      var n = Math.round(Math.min(90, r.width / 12));
+      motes = [];
+      for (var i = 0; i < n; i++){
+        motes.push({
+          x: Math.random() * w, y: Math.random() * h,
+          r: (Math.random() * 1.5 + .4) * dpr,
+          vy: -(Math.random() * .22 + .05) * dpr,
+          vx: (Math.random() - .5) * .16 * dpr,
+          a: Math.random() * .45 + .12,
+          p: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    function draw(){
+      ctx.clearRect(0, 0, w, h);
+      for (var i = 0; i < motes.length; i++){
+        var m = motes[i];
+        m.p += .008;
+        m.y += m.vy;
+        m.x += m.vx + Math.sin(m.p) * .18 * dpr;
+        if (m.y < -6){ m.y = h + 6; m.x = Math.random() * w; }
+        if (m.x < -6) m.x = w + 6;
+        if (m.x > w + 6) m.x = -6;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, 6.2832);
+        ctx.fillStyle = "rgba(247,214,147," + (m.a * (.6 + .4 * Math.sin(m.p))).toFixed(3) + ")";
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    size();
+    raf = requestAnimationFrame(draw);
+    var rt;
+    addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(size, 180); });
+    document.addEventListener("visibilitychange", function(){
+      if (document.hidden){ cancelAnimationFrame(raf); }
+      else { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
