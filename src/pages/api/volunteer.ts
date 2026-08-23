@@ -33,6 +33,27 @@ export const POST: APIRoute = async ({ request }) => {
     });
   } catch (error) {
     console.error("[volunteer] failed:", error);
+
+    // Postgres 42P01 = undefined_table. Almost always means schema.sql hasn't
+    // been re-run since the volunteers table was added, so say that outright
+    // instead of hiding it behind a generic failure.
+    const code = (error as { code?: string })?.code;
+    if (code === "42P01") {
+      return json(
+        {
+          errors: [
+            {
+              field: "",
+              message:
+                "Sign-ups aren’t set up yet on the server. Please call the convention desk instead.",
+            },
+          ],
+          setup: "The `volunteers` table is missing. Re-run supabase/schema.sql in the Supabase SQL editor.",
+        },
+        503,
+      );
+    }
+
     return json(
       {
         errors: [

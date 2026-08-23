@@ -1,0 +1,94 @@
+---
+import { convention, toDate } from "../data/convention";
+
+/**
+ * Structured data (JSON-LD) describing the convention as a real Event.
+ *
+ * This is what lets Google show the dates, venue and free admission directly
+ * in search results, and what map and assistant surfaces read. Every value
+ * comes from convention.ts, so it can never drift from what the page says.
+ */
+const { title, year, theme, verse, church, venue, contact, days } = convention;
+const site = Astro.site?.href ?? Astro.url.origin;
+
+const iso = (d: Date) => d.toISOString();
+const firstDay = days[0];
+const lastDay = days[days.length - 1];
+
+// The whole convention as one event, with each day as a sub-event so a search
+// result can surface "what's on tonight" rather than only the week.
+const event = {
+  "@context": "https://schema.org",
+  "@type": "Event",
+  name: `${title} ${year}`,
+  alternateName: theme.join(" "),
+  description: `${church} presents the ${title} ${year}. Theme: ${theme.join(" ")} — ${verse} Free to attend.`,
+  startDate: iso(toDate(firstDay.starts)),
+  endDate: iso(new Date(toDate(lastDay.starts).getTime() + 4 * 3_600_000)),
+  eventStatus: "https://schema.org/EventScheduled",
+  eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  image: [new URL("/og.png", site).href],
+  url: site,
+  isAccessibleForFree: true,
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "NGN",
+    availability: "https://schema.org/InStock",
+    url: new URL("/#register", site).href,
+    validFrom: iso(new Date()),
+  },
+  location: {
+    "@type": "Place",
+    name: venue.name,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "1–7 Majiyagbe Street, Igbe Alagemo, Off Ipetu-Oloja",
+      addressLocality: "Igbogbo Bayeku, Ikorodu",
+      addressRegion: "Lagos",
+      addressCountry: "NG",
+    },
+  },
+  organizer: {
+    "@type": "Organization",
+    name: church,
+    url: site,
+    logo: new URL("/og.png", site).href,
+    telephone: `+${contact.whatsapp}`,
+  },
+  performer: convention.ministers.map((minister) => ({
+    "@type": "Person",
+    name: minister.name,
+  })),
+  subEvent: days.map((day) => ({
+    "@type": "Event",
+    name: `${day.title} — ${day.sub}`,
+    startDate: iso(toDate(day.starts)),
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: { "@type": "Place", name: venue.name },
+    isAccessibleForFree: true,
+  })),
+};
+
+const organisation = {
+  "@context": "https://schema.org",
+  "@type": "Church",
+  name: church,
+  alternateName: "MCGC Worldwide",
+  url: site,
+  logo: new URL("/og.png", site).href,
+  telephone: `+${contact.whatsapp}`,
+  email: contact.email,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "1–7 Majiyagbe Street, Igbe Alagemo, Off Ipetu-Oloja",
+    addressLocality: "Igbogbo Bayeku, Ikorodu",
+    addressRegion: "Lagos",
+    addressCountry: "NG",
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(event)} />
+<script type="application/ld+json" set:html={JSON.stringify(organisation)} />

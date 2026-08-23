@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { convention } from "../data/convention";
+import Seo from "../components/Seo.astro";
 
 interface Props {
   title: string;
@@ -44,8 +45,19 @@ const shareImage = new URL("/og.png", Astro.site).href;
           <meta property="og:image" content={shareImage} />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={`${convention.title} ${convention.year} — ${convention.theme.join(" ")}`} />
+          <meta property="og:locale" content="en_NG" />
           <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:image" content={shareImage} />
           <meta name="theme-color" content="#0b0d1a" />
+          <meta name="author" content={convention.church} />
+          <meta
+            name="keywords"
+            content="Majiyagbe Convention 2026, Mercy of Christ Gospel Church, Ori Oke Majiyagbe, Ikorodu church convention, Igbogbo Bayeku, Behold I Come Quickly, Lagos convention, Prophet Bolarinde"
+          />
+          <meta name="geo.region" content="NG-LA" />
+          <meta name="geo.placename" content="Igbogbo Bayeku, Ikorodu, Lagos" />
+          <Seo />
         </>
       )
     }

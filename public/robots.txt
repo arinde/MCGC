@@ -1,0 +1,10 @@
+# Majiyagbe Convention 2026
+User-agent: *
+Allow: /
+
+# Private surfaces — never index.
+Disallow: /admin
+Disallow: /api
+Disallow: /pass
+
+Sitemap: https://mcgc.vercel.app/sitemap-index.xml
