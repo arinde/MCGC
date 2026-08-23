@@ -75,7 +75,7 @@ export const convention = {
     address: "1–7 Majiyagbe Street, Igbe Alagemo, Off Ipetu-Oloja, Igbogbo Bayeku, Ikorodu, Lagos State",
     landmark: "Mercy of Christ Gospel Church (World Wide)",
     /** Text Google Maps searches for. Test this on a phone before sharing the link. */
-    maps: "Ori Oke Majiyagbe, Majiyagbe Street, Igbe Alagemo, Igbogbo Bayeku, Ikorodu, Lagos",
+    maps: "Majiyagbe Mountain Mercy of Christ Gospel Church Ikorodu Lagos",
     getting: [
       // 🔴 replace all three with the real arrangements
       "Parking is available within the church compound.",

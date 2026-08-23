@@ -38,71 +38,47 @@ Sessions for 24–27 and 29 Aug are not yet known. Mark them clearly as unconfir
 Derived from the 2026 flyer. Every colour and size in the codebase comes from here; never write a raw hex inline. If a value is missing, add it here first.
 
 ```css
-/* src/styles/tokens.css */
+/* src/styles/tokens.css — names are semantic, not colour-literal, so a
+   palette change is a values-only edit. See the file for the live values. */
 :root {
-  /* Brand — oxblood ground, gold type, sky portal */
-  --color-oxblood-deep: #1a0402;  /* page floor, footer */
-  --color-oxblood:      #3d0a06;  /* primary dark surface */
-  --color-ember:        #8c1f0b;  /* mid warm red, gradients */
-  --color-flame:        #e2691c;  /* orange glow, hover warmth */
+  /* Public site: night ground + candlelight gold.
+     Chosen over the flyer's oxblood at the client's request (23 Aug 2026). */
+  --surface-deep: #0b0d1a;   /* page floor, footer */
+  --surface:      #101426;   /* primary dark surface, cards */
+  --surface-raised:#171c33;  /* inputs, insets */
 
-  --color-gold:        #e8b94a;   /* primary accent, headings, CTA */
-  --color-gold-bright: #f8e08e;   /* highlight, gradient top */
-  --color-gold-deep:   #a8761f;   /* gradient bottom, borders */
+  --accent:        #e8b44a;  /* headings, eyebrows, CTA fill */
+  --accent-bright: #f7d693;  /* hover, gradient top */
+  --accent-deep:   #8c6520;  /* borders, gradient bottom */
+  --on-accent:     #221703;  /* text on a gold fill */
 
-  --color-sky:      #5bb0e0;      /* the portal blue — use sparingly */
-  --color-sky-pale: #c9e7f7;
+  /* The one light source — hero bloom only */
+  --glow-warm: #e8b44a;  --glow-cool: #4a63b8;  --glow-cool-pale: #9fb0e8;
 
-  --color-cream:      #fff6e8;    /* body text on dark */
-  --color-cream-mute: #d9c7b4;    /* secondary text on dark */
+  --text:       #f3eada;     /* body text on dark */
+  --text-muted: #99a1bd;     /* secondary text on dark */
 
-  /* Dashboard neutrals (light surface) */
-  --color-ink:      #16130f;
-  --color-ink-mute: #5c554c;
-  --color-line:     #e4dfd7;
-  --color-surface:  #ffffff;
-  --color-canvas:   #faf7f2;
+  --rule:        rgb(140 101 32 / 0.22);
+  --rule-strong: rgb(140 101 32 / 0.45);
+
+  /* Dashboard neutrals (light surface) — unchanged */
+  --color-ink: #16130f;  --color-ink-mute: #5c554c;  --color-line: #e4dfd7;
+  --color-surface: #ffffff;  --color-canvas: #faf7f2;
 
   /* Semantic — dashboard only */
-  --color-success: #0f7b4f;
-  --color-warning: #b26a00;
-  --color-danger:  #c0362c;
-  --color-info:    #1f6feb;
+  --color-success: #0f7b4f;  --color-warning: #b26a00;
+  --color-danger:  #c0362c;  --color-info:    #1f6feb;
 
-  /* Type */
   --font-display: 'Fraunces', Georgia, serif;   /* headings only */
   --font-body:    'Figtree', system-ui, sans-serif;
   --font-mono:    ui-monospace, 'SF Mono', monospace;
-
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.25rem;
-  --text-xl:   clamp(1.5rem,  2vw + 1rem, 1.95rem);
-  --text-2xl:  clamp(1.95rem, 3vw + 1rem, 2.44rem);
-  --text-3xl:  clamp(2.4rem,  5vw + 1rem, 3.82rem);
-
-  /* Spacing — 4px base */
-  --space-1: 0.25rem;  --space-2: 0.5rem;   --space-3: 0.75rem;
-  --space-4: 1rem;     --space-6: 1.5rem;   --space-8: 2rem;
-  --space-12: 3rem;    --space-16: 4rem;    --space-24: 6rem;
-
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-arch: 999px 999px 8px 8px;  /* the arch motif — see §3 */
-
-  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.3);
-  --shadow-glow: 0 0 48px rgb(226 105 28 / 0.35);
-
-  --ease: cubic-bezier(0.2, 0, 0, 1);
-  --dur-fast: 120ms;
-  --dur-base: 240ms;
-
-  --measure: 66ch;
-  --container: 1180px;
-  --container-narrow: 720px;
 }
 ```
+
+> **Palette note.** The flyer is oxblood/gold. The client reviewed both and chose
+> the night-blue ground, so that is what ships. Token *names* are deliberately
+> theme-neutral (`--surface`, not `--oxblood`) — to change palette again, edit
+> only the values in `tokens.css`; no component should need touching.
 
 **Typography rules:**
 - Fraunces for headings only — never body copy, never UI labels. Use its `wght` 700–900 and lean into the `SOFT`/`WONK` axes for the theme lockup; keep it conventional elsewhere.
