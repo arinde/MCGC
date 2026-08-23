@@ -105,6 +105,10 @@ function turnoutState(turnout: number | null): string {
   }
 
   thead th {
+    position: sticky;
+    top: 56px;
+    background: var(--color-surface);
+    z-index: 1;
     font-size: 0.64rem;
     font-weight: 800;
     letter-spacing: 0.16em;
@@ -123,6 +127,15 @@ function turnoutState(turnout: number | null): string {
     color: var(--text);
     font-variant-numeric: tabular-nums;
     font-weight: 700;
+    text-align: right;
+  }
+
+  td.col-bar {
+    text-align: left;
+  }
+
+  thead th:not(:first-child):not(.col-bar) {
+    text-align: right;
   }
 
   td small {

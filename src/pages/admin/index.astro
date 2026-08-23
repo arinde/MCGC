@@ -193,8 +193,9 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
   }
 
   .page-head__title {
-    font-size: 2.2rem;
-    margin-top: 10px;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    margin-top: var(--space-1);
   }
 
   .page-head__meta {
@@ -285,6 +286,10 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
   }
 
   thead th {
+    position: sticky;
+    top: 56px;
+    background: var(--color-surface);
+    z-index: 1;
     font-size: 0.64rem;
     font-weight: 800;
     letter-spacing: 0.16em;

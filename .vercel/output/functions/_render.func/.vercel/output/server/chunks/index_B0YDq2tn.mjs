@@ -3,7 +3,7 @@ import { D as maybeRenderHead, E as renderTemplate, I as createAstro, b as rende
 import { t as createComponent } from "./compiler_CQKGis8q.mjs";
 import { t as renderScript } from "./script_BbaWhd6Z.mjs";
 import { n as isConfigured } from "./supabase_bDmEQrgt.mjs";
-import { t as $$Admin } from "./Admin_BYHl7AEU.mjs";
+import { t as $$Admin } from "./Admin_DJM7pyny.mjs";
 import { t as loadDashboard } from "./stats_BcOfvGZ0.mjs";
 //#region src/components/admin/StatTile.astro
 createAstro("https://majiyagbe-convention.vercel.app");

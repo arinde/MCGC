@@ -1,5 +1,6 @@
 ---
 import Base from "./Base.astro";
+import Brand from "../components/Brand.astro";
 
 interface Props {
   title: string;
@@ -15,121 +16,155 @@ const tabs = [
 ] as const;
 ---
 
-<Base title={`${title} · MCGC Admin`} noindex>
-  <header class="admin-bar">
-    <div class="wrap admin-bar__inner">
-      <a class="admin-bar__mark" href="/admin">
-        MC<span>G</span>C <small>admin</small>
-      </a>
+<Base title={`${title} · Majiyagbe Admin`} noindex>
+  <div class="admin-root">
+    <header class="admin-bar">
+      <div class="admin-bar__inner">
+        <Brand href="/admin" compact />
+        <span class="admin-bar__label">Convention admin</span>
 
-      <nav class="admin-bar__tabs" aria-label="Dashboard sections">
-        {
-          tabs.map((tab) => (
-            <a href={tab.href} aria-current={active === tab.key ? "page" : undefined}>
-              {tab.label}
-            </a>
-          ))
-        }
-      </nav>
+        <nav class="admin-bar__tabs" aria-label="Dashboard sections">
+          {
+            tabs.map((tab) => (
+              <a href={tab.href} aria-current={active === tab.key ? "page" : undefined}>
+                {tab.label}
+              </a>
+            ))
+          }
+        </nav>
 
-      <form method="POST" action="/admin/logout" class="admin-bar__logout">
-        <button type="submit">Sign out</button>
-      </form>
-    </div>
-  </header>
+        <form method="POST" action="/admin/logout">
+          <button type="submit" class="admin-bar__signout">Sign out</button>
+        </form>
+      </div>
+    </header>
 
-  <main id="main" class="admin-main">
-    <div class="wrap">
+    <main id="main" class="admin-main">
       <slot />
-    </div>
-  </main>
+    </main>
+  </div>
 </Base>
+
+<style is:global>
+  /**
+   * The dashboard is a light surface (design system §5). Rather than restyling
+   * every admin component, remap the semantic tokens here — components keep
+   * referencing `--surface`, `--text` and `--rule`, and simply resolve light.
+   *
+   * `--font-display` is remapped to the body face on purpose: no Fraunces in
+   * the dashboard, per §5.
+   */
+  .admin-root {
+    --surface-deep: var(--color-canvas);
+    --surface: var(--color-surface);
+    --surface-raised: var(--color-canvas);
+
+    --text: var(--color-ink);
+    --text-muted: var(--color-ink-mute);
+
+    --rule: var(--color-line);
+    --rule-strong: #cfc8bd;
+
+    --font-display: var(--font-body);
+
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    min-height: 100dvh;
+  }
+
+  /* Base paints the public site's night ground on <body>; the dashboard needs
+     the light canvas behind it instead. */
+  body:has(.admin-root) {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+</style>
 
 <style>
   .admin-bar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--rule-strong);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
     position: sticky;
     top: 0;
     z-index: 40;
   }
 
   .admin-bar__inner {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
     display: flex;
     align-items: center;
-    gap: 12px;
-    height: 60px;
+    gap: var(--space-3);
+    min-height: 56px;
     flex-wrap: wrap;
   }
 
-  .admin-bar__mark {
-    font-family: var(--font-display);
-    font-weight: 900;
-    color: var(--text);
-    text-decoration: none;
-    letter-spacing: 0.04em;
-  }
-
-  .admin-bar__mark span {
-    color: var(--accent);
-  }
-
-  .admin-bar__mark small {
-    font-family: var(--font-body);
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 0.2em;
+  .admin-bar__label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin-left: 6px;
+    color: var(--color-ink-mute);
   }
 
   .admin-bar__tabs {
     display: flex;
-    gap: 4px;
+    gap: var(--space-1);
     margin-left: auto;
   }
 
   .admin-bar__tabs a {
-    color: var(--text-muted);
+    color: var(--color-ink-mute);
     text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 700;
-    padding: 8px 14px;
-    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
     transition:
-      background 0.2s,
-      color 0.2s;
+      background var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
   }
 
   .admin-bar__tabs a:hover {
-    color: var(--text);
+    background: var(--color-canvas);
+    color: var(--color-ink);
   }
 
   .admin-bar__tabs a[aria-current="page"] {
     background: var(--accent);
-    color: var(--surface-deep);
+    color: var(--on-accent);
   }
 
-  .admin-bar__logout button {
+  .admin-bar__signout {
     background: none;
-    border: 1px solid var(--rule-strong);
-    color: var(--text-muted);
+    border: 1px solid var(--color-line);
+    color: var(--color-ink-mute);
     font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 8px 14px;
-    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    padding: var(--space-2) var(--space-3);
+    min-height: 44px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
   }
 
-  .admin-bar__logout button:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+  .admin-bar__signout:hover {
+    border-color: var(--color-ink-mute);
+    color: var(--color-ink);
   }
 
   .admin-main {
-    padding-block: 34px 80px;
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6) var(--space-24);
   }
 </style>
