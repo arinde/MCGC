@@ -17,7 +17,10 @@ const noteOptions = [
   <p id="reg-confirm-body"></p>
   <p class="confirm__code">
     Your code: <b id="reg-confirm-code"></b>
-    <span>Show this at the door, or just give your name.</span>
+    <span>Show this at the gate, or just give your name.</span>
+  </p>
+  <p class="confirm__pass">
+    <a id="reg-confirm-pass" href="#">Open my pass &amp; QR code &rarr;</a>
   </p>
 </div>
 
@@ -124,6 +127,9 @@ const noteOptions = [
         ? `We have you down for ${data.days.join(", ")}. Doors open 30 minutes before each session.`
         : "We have you down. Doors open 30 minutes before each session.";
       document.getElementById("reg-confirm-code")!.textContent = data.code;
+
+      const pass = document.getElementById("reg-confirm-pass") as HTMLAnchorElement;
+      pass.href = `/pass/${data.code}`;
 
       confirmBox.hidden = false;
       confirmBox.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -344,6 +350,15 @@ const noteOptions = [
     font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 4px;
+  }
+
+  .confirm__pass {
+    margin-top: var(--space-3) !important;
+  }
+
+  .confirm__pass a {
+    font-weight: 700;
+    font-size: var(--text-sm);
   }
 
   @media (min-width: 560px) {

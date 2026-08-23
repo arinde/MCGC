@@ -1,5 +1,5 @@
 import { n as defineMiddleware, t as sequence } from "./chunks/sequence_cgC9RwYc.mjs";
-import { i as isAuthenticated } from "./chunks/auth_DRoDW2VP.mjs";
+import { a as isAuthenticated } from "./chunks/auth_D8MRE_gT.mjs";
 //#region src/middleware.ts
 /**
 * Gates everything under /admin behind the shared password.

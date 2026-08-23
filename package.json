@@ -17,7 +17,8 @@
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vercel": "^11.0.7",
     "@supabase/supabase-js": "^2.112.3",
-    "astro": "^7.2.4"
+    "astro": "^7.2.4",
+    "qrcode": "^1.5.4"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
@@ -29,6 +30,7 @@
   "private": true,
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@types/qrcode": "^1.5.6",
     "typescript": "^6.0.3"
   }
 }

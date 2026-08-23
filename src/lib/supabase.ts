@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { env } from "./env";
 
 /**
  * Server-only Supabase client.
@@ -15,8 +16,8 @@ let cached: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient {
   if (cached) return cached;
 
-  const url = import.meta.env.SUPABASE_URL;
-  const key = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = env.supabaseUrl;
+  const key = env.supabaseServiceRoleKey;
 
   if (!url || !key) {
     throw new Error(
@@ -33,7 +34,7 @@ export function getSupabase(): SupabaseClient {
 
 /** True when the database is wired up — lets pages degrade gracefully instead of crashing. */
 export function isConfigured(): boolean {
-  return Boolean(import.meta.env.SUPABASE_URL && import.meta.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(env.supabaseUrl && env.supabaseServiceRoleKey);
 }
 
 // ---------------------------------------------------------------- types

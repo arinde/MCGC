@@ -1,7 +1,13 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Button from "../../components/Button.astro";
-import { checkPassword, createSession } from "../../lib/auth";
+import {
+  checkPassword,
+  createSession,
+  isPasswordConfigured,
+  rateLimit,
+  clearRateLimit,
+} from "../../lib/auth";
 import { logActivity } from "../../lib/supabase";
 
 // Reads a submitted password and sets a cookie — must run on the server.
@@ -14,17 +20,35 @@ const safeNext = nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPa
 
 let error = "";
 
+// Surfaced as a setup problem rather than a wrong-password message, so a
+// misconfigured deploy is obvious instead of looking like a typo.
+const configured = isPasswordConfigured();
+
 if (Astro.request.method === "POST") {
-  const form = await Astro.request.formData();
-  const password = String(form.get("password") ?? "");
+  if (!configured) {
+    error = "ADMIN_PASSWORD isn’t set on the server. Add it in Vercel, then redeploy.";
+  } else {
+    const ip = Astro.clientAddress || "unknown";
+    const limit = rateLimit(ip);
 
-  if (checkPassword(password)) {
-    await createSession(Astro.cookies);
-    await logActivity("login", "Signed in to the dashboard");
-    return Astro.redirect(safeNext, 302);
+    if (!limit.allowed) {
+      error = `Too many attempts. Try again in ${limit.retryInMinutes} minute${limit.retryInMinutes === 1 ? "" : "s"}.`;
+    } else {
+      const form = await Astro.request.formData();
+      const password = String(form.get("password") ?? "");
+
+      if (checkPassword(password)) {
+        if (await createSession(Astro.cookies)) {
+          clearRateLimit(ip);
+          await logActivity("login", "Signed in to the dashboard");
+          return Astro.redirect(safeNext, 302);
+        }
+        error = "Could not start a session. Check the server configuration.";
+      } else {
+        error = "That password isn’t right.";
+      }
+    }
   }
-
-  error = "That password isn’t right.";
 }
 ---
 

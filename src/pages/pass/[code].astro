@@ -1,0 +1,390 @@
+---
+import Base from "../../layouts/Base.astro";
+import Brand from "../../components/Brand.astro";
+import Button from "../../components/Button.astro";
+import { convention } from "../../data/convention";
+import { getSupabase, isConfigured } from "../../lib/supabase";
+import { isValidCode, passUrl, qrSvg } from "../../lib/pass";
+
+// Looks up a live registration — cannot be prerendered.
+export const prerender = false;
+
+const code = (Astro.params.code ?? "").toUpperCase();
+
+if (!isValidCode(code)) {
+  return Astro.redirect("/#register", 302);
+}
+
+let registration: { name: string; days: string[]; party_size: number } | null = null;
+
+if (isConfigured()) {
+  const { data } = await getSupabase()
+    .from("registrations")
+    .select("name, days, party_size")
+    .eq("code", code)
+    .maybeSingle();
+  registration = data;
+}
+
+const url = passUrl(code, Astro.site ?? Astro.url);
+const qr = registration ? await qrSvg(url) : "";
+---
+
+<Base
+  title={registration ? `${registration.name}'s pass` : "Pass not found"}
+  description="Your pass for the Majiyagbe Convention 2026."
+  noindex
+>
+  <main id="main" class="pass">
+    {
+      registration ? (
+        <article class="card">
+          <header class="card__head">
+            <Brand href="/" size="md" />
+            <p class="card__event">
+              {convention.title} {convention.year}
+            </p>
+          </header>
+
+          <div class="card__qr" set:html={qr} />
+
+          <p class="card__code" id="pass-code">{code}</p>
+          <p class="card__hint">Show this at the gate. If it won’t scan, read out the code.</p>
+
+          <dl class="card__details">
+            <div>
+              <dt>Name</dt>
+              <dd id="pass-name">{registration.name}</dd>
+            </div>
+            <div>
+              <dt>Coming</dt>
+              <dd>{registration.party_size === 1 ? "Just them" : `${registration.party_size} people`}</dd>
+            </div>
+            <div>
+              <dt>Days</dt>
+              <dd>{registration.days.length ? registration.days.join(", ") : "Not stated"}</dd>
+            </div>
+            <div>
+              <dt>Venue</dt>
+              <dd>
+                {convention.venue.name}
+                <span>{convention.datesLabel}</span>
+              </dd>
+            </div>
+          </dl>
+
+          <div class="card__actions">
+            <Button id="save-pass">Save to my phone</Button>
+            <Button id="add-calendar" variant="ghost">Add to calendar</Button>
+            <Button id="share-pass" variant="ghost">Share</Button>
+          </div>
+
+          <p class="card__save">
+            Saved to your photos, this works at the gate with no signal at all.
+            The page also opens offline once you have visited it.
+          </p>
+        </article>
+      ) : (
+        <article class="card card--empty">
+          <Brand href="/" size="md" />
+          <h1 class="display">We can’t find that pass.</h1>
+          <p>
+            The code <b>{code}</b> isn’t in our records. It may have been typed wrongly, or the
+            registration didn’t save.
+          </p>
+          <Button href="/#register">Register again</Button>
+        </article>
+      )
+    }
+  </main>
+</Base>
+
+<script>
+  /**
+   * Making the pass hard to lose. Three routes, because phones vary:
+   *   1. Save to photos — renders the card to a PNG. Survives a dead battery
+   *      on our server, works with no signal, and lives in the gallery.
+   *   2. Add to calendar — an .ics with the pass link in it, so the phone
+   *      reminds them and the link is one tap away on the day.
+   *   3. Share — sends the link to their own WhatsApp, which is where most
+   *      people actually keep things they need later.
+   */
+  const code = document.getElementById("pass-code")?.textContent?.trim() ?? "";
+  const holder = document.getElementById("pass-name")?.textContent?.trim() ?? "Guest";
+
+  const flash = (button: HTMLElement, text: string) => {
+    const original = button.textContent;
+    button.textContent = text;
+    setTimeout(() => (button.textContent = original), 2400);
+  };
+
+  // ---- 1. Save the pass as an image ----
+  document.getElementById("save-pass")?.addEventListener("click", async function () {
+    const button = this as HTMLButtonElement;
+    const svg = document.querySelector<SVGElement>(".card__qr svg");
+    if (!svg) return;
+
+    button.disabled = true;
+    flash(button, "Saving…");
+
+    try {
+      const size = 640;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size + 190;
+      const ctx = canvas.getContext("2d")!;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Rasterise the QR through a blob URL — a data: URL trips CSP on some browsers.
+      const source = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+      const objectUrl = URL.createObjectURL(blob);
+
+      const image = new Image();
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = objectUrl;
+      });
+
+      const inset = 40;
+      ctx.drawImage(image, inset, inset, size - inset * 2, size - inset * 2);
+      URL.revokeObjectURL(objectUrl);
+
+      ctx.fillStyle = "#0b0d1a";
+      ctx.textAlign = "center";
+
+      ctx.font = "700 46px ui-monospace, monospace";
+      ctx.fillText(code, size / 2, size + 20);
+
+      ctx.font = "600 26px system-ui, sans-serif";
+      ctx.fillText(holder, size / 2, size + 62);
+
+      ctx.fillStyle = "#5c554c";
+      ctx.font = "400 21px system-ui, sans-serif";
+      ctx.fillText("Majiyagbe Convention 2026", size / 2, size + 100);
+      ctx.fillText("Ori Oke Majiyagbe · 24–30 August", size / 2, size + 132);
+
+      const png = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!png) throw new Error("no blob");
+
+      const file = new File([png], `majiyagbe-pass-${code}.png`, { type: "image/png" });
+
+      // On Android/iOS the share sheet offers "Save to photos", which is where
+      // people look for it later. Desktop falls back to a download.
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Convention pass — ${code}` });
+        flash(button, "Saved");
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(png);
+        link.download = file.name;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        flash(button, "Downloaded");
+      }
+    } catch {
+      flash(button, "Screenshot instead");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // ---- 2. Add to calendar ----
+  document.getElementById("add-calendar")?.addEventListener("click", function () {
+    const button = this as HTMLElement;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const stamp = (d: Date) =>
+      `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T` +
+      `${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+
+    const start = new Date(2026, 7, 24, 17, 0);
+    const end = new Date(2026, 7, 30, 12, 0);
+
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Majiyagbe Convention//EN",
+      "BEGIN:VEVENT",
+      `UID:pass-${code}@majiyagbe`,
+      `DTSTAMP:${stamp(new Date())}`,
+      `DTSTART:${stamp(start)}`,
+      `DTEND:${stamp(end)}`,
+      "SUMMARY:Majiyagbe Convention 2026",
+      `DESCRIPTION:Your pass code is ${code}. Open your pass: ${location.href}`,
+      "LOCATION:Ori Oke Majiyagbe, Igbogbo Bayeku, Ikorodu, Lagos",
+      "BEGIN:VALARM",
+      "TRIGGER:-PT12H",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:Majiyagbe Convention starts today",
+      "END:VALARM",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    link.download = `majiyagbe-convention-${code}.ics`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    flash(button, "Added");
+  });
+
+  // ---- 3. Share the link ----
+  document.getElementById("share-pass")?.addEventListener("click", async function () {
+    const button = this as HTMLElement;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "My convention pass", url: location.href });
+        return;
+      } catch {
+        /* dismissed — fall through to copying */
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(location.href);
+      flash(button, "Link copied");
+    } catch {
+      flash(button, "Copy from the address bar");
+    }
+  });
+</script>
+
+<style>
+  .pass {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: var(--space-6);
+  }
+
+  .card {
+    width: 100%;
+    max-width: 26rem;
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-8) var(--space-6);
+    text-align: center;
+  }
+
+  .card__head {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+
+  .card__event {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  /* White quiet-zone around the QR: scanners need the contrast, and a gold-on-
+     navy QR fails on cheap camera sensors. */
+  .card__qr {
+    background: #ffffff;
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+    width: min(15rem, 70vw);
+    margin: 0 auto var(--space-4);
+  }
+
+  .card__qr :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .card__code {
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .card__hint {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin: var(--space-2) 0 var(--space-6);
+  }
+
+  .card__details {
+    display: grid;
+    gap: var(--space-3);
+    text-align: left;
+    margin: 0 0 var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--rule);
+  }
+
+  .card__details > div {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  .card__details dt {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .card__details dd {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card__details dd span {
+    display: block;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: center;
+  }
+
+  .card__save {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin: var(--space-6) 0 0;
+  }
+
+  .card--empty h1 {
+    font-size: var(--text-xl);
+    margin: var(--space-4) 0 var(--space-3);
+  }
+
+  .card--empty p {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: 0 0 var(--space-6);
+  }
+
+  .card--empty b {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    letter-spacing: 0.15em;
+  }
+</style>

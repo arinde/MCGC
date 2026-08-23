@@ -1,0 +1,396 @@
+---
+import Base from "../layouts/Base.astro";
+import SiteNav from "../components/home/SiteNav.astro";
+import SiteFooter from "../components/home/SiteFooter.astro";
+import Reveal from "../components/Reveal.astro";
+import Button from "../components/Button.astro";
+import { convention } from "../data/convention";
+import { TEAMS } from "../lib/volunteers";
+
+const { days, title, year } = convention;
+---
+
+<Base
+  title={`Join the team — ${title} ${year}`}
+  description="Serve at the Majiyagbe Convention 2026. Ushering, media, prayer, security, sanitation and protocol."
+>
+  <SiteNav />
+
+  <main id="main">
+    <section class="band intro">
+      <div class="wrap">
+        <p class="eyebrow">Join the team</p>
+        <h1 class="display intro__title">Come and serve.</h1>
+        <p class="lede">
+          A convention this size runs on people who show up early and stay late. Tell us where
+          you&rsquo;d like to serve and the team lead will call you before the convention begins.
+        </p>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <ul class="teams rv">
+          {
+            TEAMS.map((team) => (
+              <li class="team">
+                <h2>{team.name}</h2>
+                <p class="team__blurb">{team.blurb}</p>
+                <p class="team__needs">{team.needs}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="band form-band" id="signup">
+      <div class="wrap">
+        <div class="head rv">
+          <p class="eyebrow">Sign up</p>
+          <h2 class="display">Put your name down.</h2>
+        </div>
+
+        <div class="confirm" id="vol-confirm" role="status" aria-live="polite" hidden>
+          <h3 id="vol-confirm-head"></h3>
+          <p id="vol-confirm-body"></p>
+        </div>
+
+        <form class="form rv" id="vol-form" novalidate>
+          <div class="field">
+            <label for="v-name">Full name</label>
+            <input type="text" id="v-name" name="name" autocomplete="name" required />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="v-phone">Phone (WhatsApp)</label>
+              <input type="tel" id="v-phone" name="phone" placeholder="0803 000 0000" autocomplete="tel" required />
+            </div>
+            <div class="field">
+              <label for="v-email">Email <span class="optional">(optional)</span></label>
+              <input type="email" id="v-email" name="email" autocomplete="email" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="v-branch">Branch / church</label>
+            <input type="text" id="v-branch" name="branch" autocomplete="organization" />
+          </div>
+
+          <fieldset class="field">
+            <legend>Which team would you like to serve on?</legend>
+            <div class="chips">
+              {
+                TEAMS.map((team) => (
+                  <label class="chip">
+                    <input type="checkbox" name="teams" value={team.id} />
+                    <span>{team.name}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend>Which days can you serve?</legend>
+            <div class="chips">
+              {
+                days.map((day) => (
+                  <label class="chip">
+                    <input type="checkbox" name="days" value={day.label} />
+                    <span>{day.label}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="v-experience">
+              Have you served before? <span class="optional">(optional)</span>
+            </label>
+            <input
+              type="text"
+              id="v-experience"
+              name="experience"
+              placeholder="e.g. Media team at the 2025 convention"
+            />
+          </div>
+
+          <Button type="submit" id="vol-submit">Sign me up</Button>
+
+          <p class="note" id="vol-note">
+            The team lead will call you on this number before the convention begins.
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter />
+  <Reveal />
+</Base>
+
+<script>
+  const form = document.getElementById("vol-form") as HTMLFormElement | null;
+  const submit = document.getElementById("vol-submit") as HTMLButtonElement | null;
+  const note = document.getElementById("vol-note");
+  const confirmBox = document.getElementById("vol-confirm");
+
+  const DEFAULT_NOTE = "The team lead will call you on this number before the convention begins.";
+
+  if (form && submit && note && confirmBox) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const payload = {
+        name: String(data.get("name") ?? ""),
+        phone: String(data.get("phone") ?? ""),
+        email: String(data.get("email") ?? ""),
+        branch: String(data.get("branch") ?? ""),
+        experience: String(data.get("experience") ?? ""),
+        teams: data.getAll("teams").map(String),
+        days: data.getAll("days").map(String),
+      };
+
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      note.textContent = DEFAULT_NOTE;
+      note.classList.remove("is-error");
+
+      try {
+        const response = await fetch("/api/volunteer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          const first = result.errors?.[0];
+          note.textContent = first?.message ?? "Something went wrong. Please try again.";
+          note.classList.add("is-error");
+          if (first?.field) {
+            form.querySelector<HTMLElement>(`[name="${first.field}"]`)?.focus();
+          }
+          return;
+        }
+
+        const firstName = result.name.split(" ")[0];
+        document.getElementById("vol-confirm-head")!.textContent = result.alreadySignedUp
+          ? `Updated — thank you, ${firstName}.`
+          : `Thank you, ${firstName}.`;
+        document.getElementById("vol-confirm-body")!.textContent =
+          "The team lead will call you before the convention begins. God bless you for serving.";
+
+        confirmBox.hidden = false;
+        confirmBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        form.reset();
+      } catch {
+        note.textContent = "We couldn’t reach the server. Check your connection and try again.";
+        note.classList.add("is-error");
+      } finally {
+        submit.disabled = false;
+        submit.textContent = "Sign me up";
+      }
+    });
+  }
+</script>
+
+<style>
+  .intro {
+    padding-bottom: var(--space-8);
+  }
+
+  .intro__title {
+    font-size: var(--text-2xl);
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  .teams {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  }
+
+  .team {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+
+  .team h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0 0 var(--space-2);
+  }
+
+  .team__blurb {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text);
+  }
+
+  .team__needs {
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--rule);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .form-band {
+    background: var(--surface);
+  }
+
+  .form {
+    background: var(--surface-deep);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    max-width: 44rem;
+  }
+
+  .field {
+    margin-bottom: var(--space-4);
+    border: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .field label,
+  .field legend {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: var(--space-2);
+    padding: 0;
+  }
+
+  .optional {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--surface-raised);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: var(--text-base);
+    padding: var(--space-3);
+    min-height: 44px;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  .field-row {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .chip {
+    position: relative;
+  }
+
+  .chip input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .chip span {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+    border-radius: 999px;
+    border: 1px solid var(--rule-strong);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    transition:
+      background var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease);
+  }
+
+  .chip input:checked + span {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .chip input:focus-visible + span {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .note {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin: var(--space-4) 0 0;
+  }
+
+  .note.is-error {
+    color: var(--accent);
+  }
+
+  .confirm {
+    border: 1px solid var(--accent-deep);
+    background: rgb(232 180 74 / 0.07);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+    max-width: 44rem;
+  }
+
+  .confirm h3 {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--accent);
+  }
+
+  .confirm p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 560px) {
+    .field-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

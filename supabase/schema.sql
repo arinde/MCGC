@@ -122,3 +122,47 @@ select coalesce(nullif(trim(branch), ''), 'Not stated') as branch,
 from   registrations
 group  by 1
 order  by people desc;
+
+-- =====================================================================
+--  Volunteers ("join the team")
+--  Added after launch planning — run this block on an existing database
+--  and it will create just the new table.
+-- =====================================================================
+create table if not exists volunteers (
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null,
+  phone        text not null,
+  email        text,
+  branch       text,
+
+  -- media / sanitation / prayer / security / ushering / protocol
+  teams        text[] not null default '{}',
+
+  -- Which days they can serve, e.g. {"Day 1","Day 5"}
+  days         text[] not null default '{}',
+
+  experience   text,
+  notes        text,
+
+  -- pending → contacted → confirmed → declined
+  status       text not null default 'pending'
+                 check (status in ('pending','contacted','confirmed','declined')),
+
+  created_at   timestamptz not null default now(),
+  -- One sign-up per phone number; re-submitting updates the existing row.
+  unique (phone)
+);
+
+create index if not exists volunteers_created_idx on volunteers (created_at desc);
+create index if not exists volunteers_status_idx  on volunteers (status);
+
+alter table volunteers enable row level security;
+-- No policies, as with every other table: server-side access only.
+
+create or replace view v_volunteers_by_team as
+select t.team, count(*)::int as people
+from   volunteers v
+cross  join lateral unnest(v.teams) as t(team)
+where  v.status <> 'declined'
+group  by t.team
+order  by people desc;

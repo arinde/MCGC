@@ -4,14 +4,15 @@ import Brand from "../components/Brand.astro";
 
 interface Props {
   title: string;
-  active: "overview" | "checkin" | "counts";
+  active: "overview" | "scan" | "checkin" | "counts";
 }
 
 const { title, active } = Astro.props;
 
 const tabs = [
   { key: "overview", href: "/admin", label: "Overview" },
-  { key: "checkin", href: "/admin/checkin", label: "Check-in" },
+  { key: "scan", href: "/admin/scan", label: "Scan" },
+  { key: "checkin", href: "/admin/checkin", label: "Search" },
   { key: "counts", href: "/admin/counts", label: "Headcounts" },
 ] as const;
 ---
