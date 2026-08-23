@@ -53,7 +53,7 @@ if (ready) {
 
         <div class="scanner" data-day={selectedDay}>
           <div class="viewport" id="viewport">
-            <video id="video" playsinline muted></video>
+            <video id="video" playsinline webkit-playsinline muted autoplay></video>
             <div class="reticle" aria-hidden="true"></div>
             <p class="viewport__idle" id="viewport-idle">Camera is off</p>
           </div>
@@ -92,6 +92,8 @@ if (ready) {
 </Admin>
 
 <script>
+  import { createDecoder, openCamera, cameraErrorMessage } from "../../lib/scanner";
+
   const scanner = document.querySelector<HTMLElement>(".scanner");
   const video = document.getElementById("video") as HTMLVideoElement | null;
   const toggle = document.getElementById("scan-toggle") as HTMLButtonElement | null;
@@ -105,17 +107,21 @@ if (ready) {
 
   if (scanner && video && toggle && status && log) {
     const day = scanner.dataset.day!;
+    const decoder = createDecoder();
 
     let stream: MediaStream | null = null;
     let running = false;
     let facing: "environment" | "user" = "environment";
-    let detector: any = null;
-    let frame = 0;
+    let timer = 0;
 
-    // Ignore repeat reads of the same pass while it's still in frame — a
-    // camera fires many times a second and the gate would flood with dupes.
+    // The same pass stays in frame for many frames; ignore repeats briefly.
     const recentlySeen = new Map<string, number>();
     const COOLDOWN_MS = 4000;
+
+    // jsQR decodes on the main thread, so poll rather than tying it to the
+    // frame rate — 10/sec is plenty for a person holding up a phone, and
+    // leaves the UI responsive on an older handset.
+    const INTERVAL_MS = decoder.engine === "native" ? 120 : 220;
 
     const setStatus = (message: string, tone: "" | "ok" | "warn" | "bad" = "") => {
       status.textContent = message;
@@ -123,9 +129,9 @@ if (ready) {
     };
 
     const beep = (good: boolean) => {
-      // A short tone: at a noisy gate the usher hears the result without looking.
       try {
-        const context = new AudioContext();
+        const Ctx = (window as any).AudioContext ?? (window as any).webkitAudioContext;
+        const context = new Ctx();
         const osc = context.createOscillator();
         const gain = context.createGain();
         osc.frequency.value = good ? 880 : 220;
@@ -137,7 +143,7 @@ if (ready) {
           context.close();
         }, good ? 120 : 260);
       } catch {
-        /* audio blocked — the on-screen result still shows */
+        /* iOS mutes audio until a gesture — the on-screen result still shows */
       }
       if (navigator.vibrate) navigator.vibrate(good ? 60 : [60, 60, 60]);
     };
@@ -145,7 +151,7 @@ if (ready) {
     const addToLog = (name: string, note: string, tone: string) => {
       const item = document.createElement("li");
       item.className = `log__item log__item--${tone}`;
-      item.innerHTML = `<b></b><span></span><time></time>`;
+      item.innerHTML = "<b></b><span></span><time></time>";
       item.querySelector("b")!.textContent = name;
       item.querySelector("span")!.textContent = note;
       item.querySelector("time")!.textContent = new Date().toLocaleTimeString("en-GB", {
@@ -190,7 +196,11 @@ if (ready) {
           `${result.name} — in.${result.partySize > 1 ? ` Party of ${result.partySize}.` : ""}`,
           "ok",
         );
-        addToLog(result.name, `Checked in${result.partySize > 1 ? ` · ${result.partySize} people` : ""}`, "ok");
+        addToLog(
+          result.name,
+          `Checked in${result.partySize > 1 ? ` · ${result.partySize} people` : ""}`,
+          "ok",
+        );
         beep(true);
         if (counter) counter.textContent = String(Number(counter.textContent) + 1);
       } catch {
@@ -199,10 +209,9 @@ if (ready) {
       }
     };
 
-    // ---- camera ----
     const stop = () => {
       running = false;
-      cancelAnimationFrame(frame);
+      clearInterval(timer);
       stream?.getTracks().forEach((track) => track.stop());
       stream = null;
       video.srcObject = null;
@@ -213,52 +222,35 @@ if (ready) {
     };
 
     const tick = async () => {
-      if (!running || !detector) return;
-
-      try {
-        const codes = await detector.detect(video);
-        if (codes.length > 0 && codes[0].rawValue) {
-          await submit(codes[0].rawValue);
-        }
-      } catch {
-        /* a dropped frame is not worth reporting */
-      }
-
-      frame = requestAnimationFrame(tick);
+      if (!running || video.readyState < 2) return;
+      const value = await decoder.decode(video);
+      if (value) await submit(value);
     };
 
     const start = async () => {
-      if (!("BarcodeDetector" in window)) {
-        setStatus(
-          "This browser can’t scan. Use Chrome on Android, or type the code below.",
-          "warn",
-        );
-        manualInput?.focus();
-        return;
-      }
-
       try {
-        detector ??= new (window as any).BarcodeDetector({ formats: ["qr_code"] });
-
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facing },
-        });
-
+        stream = await openCamera(facing);
         video.srcObject = stream;
-        await video.play();
+
+        // iOS can reject play() if the gesture has already been consumed;
+        // the stream is still live, so carry on rather than failing the scan.
+        try {
+          await video.play();
+        } catch {
+          /* autoplay attribute usually covers it */
+        }
 
         running = true;
         scanner.classList.add("is-live");
         toggle.textContent = "Stop camera";
         flip?.removeAttribute("hidden");
         if (idle) idle.hidden = true;
-        setStatus("Ready — point at the pass.");
-        frame = requestAnimationFrame(tick);
-      } catch {
-        setStatus(
-          "Camera blocked. Allow camera access in your browser, or type the code below.",
-          "bad",
-        );
+        setStatus("Ready — hold the pass in the frame.");
+
+        clearInterval(timer);
+        timer = window.setInterval(tick, INTERVAL_MS);
+      } catch (error) {
+        setStatus(cameraErrorMessage(error), "bad");
         manualInput?.focus();
       }
     };
@@ -271,8 +263,8 @@ if (ready) {
       await start();
     });
 
-    // Releasing the camera when the tab is hidden stops the phone cooking in
-    // an usher's pocket.
+    // Release the camera when the tab is hidden — otherwise the phone runs hot
+    // in an usher's pocket between arrivals.
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && running) stop();
     });
