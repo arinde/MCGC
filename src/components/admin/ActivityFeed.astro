@@ -1,0 +1,114 @@
+---
+import Panel from "./Panel.astro";
+import type { Activity } from "../../lib/supabase";
+
+interface Props {
+  activity: Activity[];
+}
+
+const { activity } = Astro.props;
+
+const timeFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+---
+
+<Panel title="Activity" hint="The last 30 things that happened, newest first.">
+  {
+    activity.length === 0 ? (
+      <p class="empty">No activity recorded yet.</p>
+    ) : (
+      <ul class="activity">
+        {activity.map((entry) => (
+          <li>
+            <span class:list={["activity__kind", `activity__kind--${entry.kind}`]}>
+              {entry.kind}
+            </span>
+            <span class="activity__text">{entry.summary}</span>
+            <time datetime={entry.created_at}>{timeFormat.format(new Date(entry.created_at))}</time>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Panel>
+
+<style>
+  .activity {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+  .activity li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: var(--space-1);
+    gap: var(--space-3);
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.86rem;
+  }
+
+  .activity__kind {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1px solid var(--rule-strong);
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .activity__kind--registration {
+    color: var(--accent);
+    border-color: var(--accent-deep);
+  }
+
+  .activity__kind--checkin {
+    color: var(--color-success);
+    border-color: var(--color-success);
+  }
+
+  .activity__kind--volunteer {
+    color: var(--color-info);
+    border-color: var(--color-info);
+  }
+
+  .activity__text {
+    color: var(--text);
+  }
+
+  .activity time {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    grid-column: 2;
+  }
+
+  @media (min-width: 640px) {
+    .activity li {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .activity time {
+      grid-column: auto;
+    }
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+</style>

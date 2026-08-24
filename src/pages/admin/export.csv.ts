@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { loadForExport } from "../../lib/stats";
+import { loadForExport, readFilters, hasFilters, type PeopleFilters } from "../../lib/people";
 import { logActivity } from "../../lib/supabase";
 
 // Streams live data; the middleware has already checked auth.
@@ -11,7 +11,10 @@ const HEADERS = [
   "Email",
   "Branch",
   "Party size",
-  "Nights",
+  "Bringing",
+  "Nights booked",
+  "Needs",
+  "Checked in for",
   "Notes",
   "Code",
   "Registered at",
@@ -27,23 +30,48 @@ function csvCell(value: unknown): string {
   return `"${safe.replace(/"/g, '""')}"`;
 }
 
+/** Names the file after what's actually in it, so downloads don't all collide. */
+function describe(filters: PeopleFilters): string {
+  if (!hasFilters(filters)) return "all";
+
+  const parts = [
+    filters.flag,
+    filters.day,
+    filters.branch,
+    filters.attendance,
+    filters.search && `search-${filters.search}`,
+  ].filter(Boolean) as string[];
+
+  return (
+    parts
+      .join("-")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60) || "filtered"
+  );
+}
+
 export const GET: APIRoute = async ({ url }) => {
-  const filter = url.searchParams.get("filter") ?? "all";
+  const filters = readFilters(url.searchParams);
 
   try {
-    const registrations = await loadForExport(filter);
+    const people = await loadForExport(filters);
 
-    const rows = registrations.map((registration) =>
+    const rows = people.map((person) =>
       [
-        registration.name,
-        registration.phone,
-        registration.email,
-        registration.branch,
-        registration.party_size,
-        registration.days.join(" / "),
-        registration.flags.join(" / "),
-        registration.code,
-        new Date(registration.created_at).toISOString(),
+        person.name,
+        person.phone,
+        person.email,
+        person.branch,
+        person.party_size,
+        (person.guest_names ?? []).join(" / "),
+        person.days.join(" / "),
+        person.flags.join(" / "),
+        person.attendedDays.join(" / "),
+        person.notes,
+        person.code,
+        new Date(person.created_at).toISOString(),
       ]
         .map(csvCell)
         .join(","),
@@ -52,10 +80,10 @@ export const GET: APIRoute = async ({ url }) => {
     // The BOM makes Excel open UTF-8 correctly on Windows.
     const csv = "﻿" + [HEADERS.map(csvCell).join(","), ...rows].join("\r\n");
 
-    const slug = filter === "all" ? "all" : filter.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const filename = `mcgc-registrations-${slug}-${new Date().toISOString().slice(0, 10)}.csv`;
+    const slug = describe(filters);
+    const filename = `mcgc-register-${slug}-${new Date().toISOString().slice(0, 10)}.csv`;
 
-    await logActivity("export", `Exported the "${filter}" list (${registrations.length} rows)`);
+    await logActivity("export", `Exported the "${slug}" list (${people.length} rows)`);
 
     return new Response(csv, {
       headers: {

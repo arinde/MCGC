@@ -1,12 +1,24 @@
 import type { APIRoute } from "astro";
 import { getSupabase } from "../../lib/supabase";
 import { normalisePhone } from "../../lib/registrations";
+import { hasGuestNames } from "../../lib/schema";
 import { isAuthenticated } from "../../lib/auth";
 
 // Queries live data behind auth.
 export const prerender = false;
 
 const MAX_RESULTS = 12;
+
+/** What the usher's search returns for each match. */
+type Match = {
+  id: string;
+  name: string;
+  phone: string;
+  branch: string | null;
+  code: string;
+  party_size: number;
+  guest_names?: string[];
+};
 
 /** `%` and `_` are wildcards in ILIKE; a name containing them must not widen the search. */
 function escapeLikePattern(value: string): string {
@@ -37,9 +49,16 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     filters.push(`phone.ilike.%${escapeLikePattern(phone)}%`);
   }
 
+  // Typed as a plain string on purpose: supabase-js infers the row shape from
+  // a literal select, and cannot parse one built at runtime. `guest_names` is
+  // only named when the database actually has it — see src/lib/schema.ts.
+  const columns: string = (await hasGuestNames())
+    ? "id, name, phone, branch, code, party_size, guest_names"
+    : "id, name, phone, branch, code, party_size";
+
   const { data, error } = await supabase
     .from("registrations")
-    .select("id, name, phone, branch, code, party_size")
+    .select(columns)
     .or(filters.join(","))
     .limit(MAX_RESULTS);
 
@@ -48,7 +67,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     return Response.json([], { status: 500 });
   }
 
-  const registrations = data ?? [];
+  const registrations = (data ?? []) as unknown as Match[];
   if (registrations.length === 0) return Response.json([]);
 
   const { data: checkins } = await supabase

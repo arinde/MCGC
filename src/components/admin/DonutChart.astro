@@ -1,0 +1,166 @@
+---
+import { buildDonut, type Slice } from "../../lib/charts";
+
+/**
+ * Donut (pie) chart with a legend, rendered as SVG on the server.
+ *
+ * A donut rather than a solid pie so the total can sit in the middle — the
+ * proportions and the headline number are the same glance.
+ */
+
+interface Props {
+  slices: Slice[];
+  /** Sits inside the ring. */
+  totalLabel: string;
+  caption: string;
+}
+
+const { slices, totalLabel, caption } = Astro.props;
+
+const SIZE = 180;
+const THICKNESS = 34;
+
+const { segments, total } = buildDonut(slices, SIZE, THICKNESS);
+
+const percent = new Intl.NumberFormat("en-GB", {
+  style: "percent",
+  maximumFractionDigits: 0,
+});
+---
+
+{
+  segments.length === 0 ? (
+    <p class="empty">Nothing to chart yet.</p>
+  ) : (
+    <figure class="donut">
+      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={caption} class="donut__svg">
+        {segments.map((segment) => (
+          <path d={segment.path} fill={segment.color}>
+            <title>
+              {segment.label}: {segment.value} ({percent.format(segment.percent)})
+            </title>
+          </path>
+        ))}
+
+        <text x={SIZE / 2} y={SIZE / 2 - 2} text-anchor="middle" class="donut__total">
+          {total}
+        </text>
+        <text x={SIZE / 2} y={SIZE / 2 + 16} text-anchor="middle" class="donut__caption">
+          {totalLabel}
+        </text>
+      </svg>
+
+      <figcaption class="donut__legend">
+        <ul>
+          {segments.map((segment) => (
+            <li>
+              <span class="donut__key" style={`background:${segment.color}`} />
+              {segment.href ? (
+                <a href={segment.href} class="donut__label">
+                  {segment.label}
+                </a>
+              ) : (
+                <span class="donut__label">{segment.label}</span>
+              )}
+              <span class="donut__value">{segment.value}</span>
+              <span class="donut__percent">{percent.format(segment.percent)}</span>
+            </li>
+          ))}
+        </ul>
+      </figcaption>
+    </figure>
+  )
+}
+
+<style>
+  .donut {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+    margin: 0;
+  }
+
+  .donut__svg {
+    width: 160px;
+    height: auto;
+    justify-self: center;
+  }
+
+  .donut__total {
+    fill: var(--text);
+    font-family: var(--font-body);
+    font-size: 30px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .donut__caption {
+    fill: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .donut__legend ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .donut__legend li {
+    display: grid;
+    grid-template-columns: 12px 1fr auto auto;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .donut__key {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .donut__label {
+    color: var(--text);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  a.donut__label:hover {
+    color: var(--color-info);
+    text-decoration: underline;
+  }
+
+  .donut__value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .donut__percent {
+    font-variant-numeric: tabular-nums;
+    min-width: 4ch;
+    text-align: right;
+  }
+
+  @media (min-width: 520px) {
+    .donut {
+      grid-template-columns: auto 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+</style>

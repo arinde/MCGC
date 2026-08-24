@@ -1,0 +1,93 @@
+---
+import { branches } from "../data/convention";
+import { OTHER_BRANCH } from "../lib/branches";
+
+/**
+ * Branch picker, shared by the registration and volunteer forms.
+ *
+ * A dropdown rather than a text box because free text produced "Igbe",
+ * "Igbe branch" and "igbe branch" as three separate branches on the dashboard.
+ *
+ * "Other" reveals a second input rather than being a dead end — a visitor from
+ * another church has to be able to say where they've come from, and that
+ * answer is worth keeping.
+ *
+ * The two controls carry different names (`branch` and `branchOther`) and the
+ * server picks between them. Sharing one name would mean disabling whichever
+ * is hidden, and a disabled <select> can't be changed back.
+ */
+
+interface Props {
+  /** Unique per form — two of these on one page would collide on id. */
+  id: string;
+  label?: string;
+  required?: boolean;
+}
+
+const { id, label = "Branch", required = false } = Astro.props;
+const otherId = `${id}-other`;
+---
+
+<div class="field" data-branch-field>
+  <label for={id}>
+    {label}
+    {!required && <span class="field__optional">(optional)</span>}
+  </label>
+
+  <select id={id} name="branch" data-branch-select required={required}>
+    <option value="">Choose your branch</option>
+    {branches.map((branch) => <option value={branch}>{branch}</option>)}
+    <option value={OTHER_BRANCH}>Other / another church</option>
+  </select>
+
+  <input
+    type="text"
+    id={otherId}
+    name="branchOther"
+    data-branch-other
+    placeholder="Which church or branch?"
+    aria-label="Name of your church or branch"
+    autocomplete="organization"
+    hidden
+  />
+</div>
+
+<script>
+  import { OTHER_BRANCH } from "../lib/branches";
+
+  // Progressive enhancement: with no JS the text box is simply always visible,
+  // and the server still ignores it unless "Other" was the choice.
+  document.querySelectorAll<HTMLElement>("[data-branch-field]").forEach((field) => {
+    const select = field.querySelector<HTMLSelectElement>("[data-branch-select]");
+    const other = field.querySelector<HTMLInputElement>("[data-branch-other]");
+    if (!select || !other) return;
+
+    let touched = false;
+
+    const sync = () => {
+      const isOther = select.value === OTHER_BRANCH;
+
+      other.hidden = !isOther;
+      // Only demand the name once they've actively chosen Other, and only when
+      // the branch itself was required.
+      other.required = isOther && select.required;
+
+      if (!isOther) other.value = "";
+      if (isOther && touched) other.focus();
+    };
+
+    select.addEventListener("change", () => {
+      touched = true;
+      sync();
+    });
+
+    sync();
+  });
+</script>
+
+<style>
+  [data-branch-field] {
+    display: grid;
+    gap: var(--space-2);
+  }
+</style>

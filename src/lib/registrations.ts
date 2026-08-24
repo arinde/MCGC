@@ -1,5 +1,7 @@
 import { getSupabase, makeCode, logActivity, type Registration } from "./supabase";
 import { dayLabels } from "../data/convention";
+import { resolveBranch } from "./branches";
+import { hasGuestNames, registrationColumns } from "./schema";
 
 /** What the registration form sends us. Everything is untrusted. */
 export type RegistrationInput = {
@@ -7,7 +9,9 @@ export type RegistrationInput = {
   phone: string;
   email?: string;
   branch?: string;
+  branchOther?: string;
   guestsLabel?: string;
+  guestNames?: string;
   days?: string[];
   flags?: string[];
 };
@@ -20,6 +24,38 @@ export function partySizeFrom(guestsLabel: string | undefined): number {
   const match = guestsLabel.match(/(\d+)/);
   if (!match) return 1;
   return Math.min(1 + Number(match[1]), 50);
+}
+
+/**
+ * How many people this booking is really for.
+ *
+ * If someone picks "Me + 4 or more" and then lists six names, six is the truth
+ * and the dropdown was just the closest option available. The count never goes
+ * below what they picked, so leaving the names blank changes nothing.
+ */
+export function partySize(guestsLabel: string | undefined, guestNames: string[]): number {
+  return Math.min(Math.max(partySizeFrom(guestsLabel), 1 + guestNames.length), 50);
+}
+
+const MAX_GUESTS = 30;
+const MAX_GUEST_NAME = 80;
+
+/**
+ * The guests someone is bringing, typed as free text.
+ *
+ * People split names however feels natural on a phone — one per line, commas,
+ * or both — so all three are accepted. Names are NOT de-duplicated: two
+ * brothers can share a first name, and silently dropping one would understate
+ * the party at the gate.
+ */
+export function sanitiseGuestNames(raw: string | undefined): string[] {
+  if (!raw) return [];
+
+  return raw
+    .split(/[\n,;]+/)
+    .map((name) => name.trim().replace(/\s+/g, " ").slice(0, MAX_GUEST_NAME))
+    .filter((name) => name.length >= 2)
+    .slice(0, MAX_GUESTS);
 }
 
 /**
@@ -98,12 +134,20 @@ export async function createRegistration(input: RegistrationInput): Promise<Crea
   const supabase = getSupabase();
   const phone = normalisePhone(input.phone);
   const days = sanitiseDays(input.days);
+  const guestNames = sanitiseGuestNames(input.guestNames);
+  const branch = resolveBranch(input.branch, input.branchOther);
 
-  const { data: existing } = await supabase
+  // Only write the column if the database has it — see src/lib/schema.ts.
+  const guestNamesColumn = (await hasGuestNames()) ? { guest_names: guestNames } : {};
+
+  const { data: existingRow } = await supabase
     .from("registrations")
-    .select("id, code, name, phone, email, branch, guests_label, party_size, days, flags, source, notes, created_at")
+    .select(await registrationColumns())
     .eq("phone", phone)
     .maybeSingle();
+
+  // The column list is built at runtime, so supabase-js cannot infer the row.
+  const existing = existingRow as unknown as Registration | null;
 
   if (existing) {
     // Merge rather than overwrite: if they registered for Day 1 and come back
@@ -114,9 +158,11 @@ export async function createRegistration(input: RegistrationInput): Promise<Crea
       .update({
         name: input.name.trim(),
         email: input.email?.trim() || existing.email,
-        branch: input.branch?.trim() || existing.branch,
+        branch: branch || existing.branch,
         guests_label: input.guestsLabel ?? existing.guests_label,
-        party_size: partySizeFrom(input.guestsLabel) || existing.party_size,
+        party_size: partySize(input.guestsLabel, guestNames) || existing.party_size,
+        // Someone returning to add a name shouldn't wipe the ones already there.
+        ...(guestNames.length > 0 ? guestNamesColumn : {}),
         days: mergedDays,
         flags: sanitiseFlags(input.flags),
       })
@@ -139,9 +185,10 @@ export async function createRegistration(input: RegistrationInput): Promise<Crea
       name: input.name.trim(),
       phone,
       email: input.email?.trim() || null,
-      branch: input.branch?.trim() || null,
+      branch: branch || null,
       guests_label: input.guestsLabel ?? null,
-      party_size: partySizeFrom(input.guestsLabel),
+      party_size: partySize(input.guestsLabel, guestNames),
+      ...guestNamesColumn,
       days,
       flags: sanitiseFlags(input.flags),
       source: "website",

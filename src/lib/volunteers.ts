@@ -1,5 +1,6 @@
 import { getSupabase, logActivity } from "./supabase";
 import { normalisePhone } from "./registrations";
+import { resolveBranch } from "./branches";
 import { dayLabels } from "../data/convention";
 
 /**
@@ -80,6 +81,7 @@ export type VolunteerInput = {
   phone: string;
   email?: string;
   branch?: string;
+  branchOther?: string;
   teams?: string[];
   days?: string[];
   experience?: string;
@@ -129,7 +131,7 @@ export async function createVolunteer(input: VolunteerInput): Promise<VolunteerR
     name: input.name.trim(),
     phone,
     email: input.email?.trim() || null,
-    branch: input.branch?.trim() || null,
+    branch: resolveBranch(input.branch, input.branchOther) || null,
     teams,
     days,
     experience: input.experience?.trim() || null,

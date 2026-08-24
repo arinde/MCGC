@@ -1,0 +1,349 @@
+---
+import Admin from "../../layouts/Admin.astro";
+import FilterBar from "../../components/admin/FilterBar.astro";
+import { isConfigured } from "../../lib/supabase";
+import { loadPeople, readFilters, filterQuery, type PeopleResult } from "../../lib/people";
+import { FLAGS } from "../../lib/stats";
+import { branchLabel } from "../../lib/branches";
+
+/**
+ * The register: every person who signed up, with every field they gave.
+ *
+ * This is the page that answers "who asked for transport" without exporting a
+ * spreadsheet first. Filters live in the URL, so a narrowed list can be sent
+ * straight to the team that has to act on it.
+ */
+export const prerender = false;
+
+const filters = readFilters(Astro.url.searchParams);
+
+let result: PeopleResult | null = null;
+let loadError = "";
+
+if (!isConfigured()) {
+  loadError = "Supabase isn’t configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.";
+} else {
+  try {
+    result = await loadPeople(filters);
+  } catch (error) {
+    console.error("[people] load failed:", error);
+    loadError = "Couldn’t reach the database. Check the credentials and that schema.sql has been run.";
+  }
+}
+
+const exportHref = `/admin/export.csv?${filterQuery(filters)}`;
+
+/** Short names for the needs badges — the full labels don't fit a table cell. */
+const badge: Record<string, string> = {
+  "First-time guest": "First-timer",
+  "Bringing children": "Children",
+  "Needs transport": "Transport",
+  "Accessible seating": "Access",
+};
+
+const badgeClass: Record<string, string> = {
+  "First-time guest": "badge--first",
+  "Bringing children": "badge--children",
+  "Needs transport": "badge--transport",
+  "Accessible seating": "badge--access",
+};
+
+const timeFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+---
+
+<Admin title="Register" active="people">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Everyone who signed up</p>
+      <h1 class="page-head__title">Register</h1>
+    </div>
+  </div>
+
+  {
+    loadError ? (
+      <div class="notice">
+        <p>{loadError}</p>
+      </div>
+    ) : (
+      result && (
+        <>
+          <div class="shortcuts">
+            <span class="shortcuts__label">Jump to</span>
+            {FLAGS.map((flag) => (
+              <a
+                class:list={["shortcut", filters.flag === flag.id && "shortcut--on"]}
+                href={`/admin/people?flag=${encodeURIComponent(flag.id)}`}
+              >
+                {flag.label}
+              </a>
+            ))}
+            <a
+              class:list={["shortcut", filters.attendance === "not-checked-in" && "shortcut--on"]}
+              href="/admin/people?attendance=not-checked-in"
+            >
+              Not yet checked in
+            </a>
+          </div>
+
+          <FilterBar
+            filters={filters}
+            branches={result.branches}
+            matchedParties={result.matchedParties}
+            matchedPeople={result.matchedPeople}
+            totalParties={result.totalParties}
+            exportHref={exportHref}
+          />
+
+          {result.people.length === 0 ? (
+            <p class="empty">
+              Nobody matches those filters.{" "}
+              <a href="/admin/people">Clear them</a> to see everyone.
+            </p>
+          ) : (
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Contact</th>
+                    <th scope="col">Branch</th>
+                    <th scope="col" class="num">Party</th>
+                    <th scope="col">Bringing</th>
+                    <th scope="col">Nights</th>
+                    <th scope="col">Needs</th>
+                    <th scope="col">Checked in</th>
+                    <th scope="col">Code</th>
+                    <th scope="col">Signed up</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.people.map((person) => (
+                    <tr>
+                      <th scope="row">
+                        {person.name}
+                        {person.notes && <span class="sub">“{person.notes}”</span>}
+                      </th>
+
+                      <td data-label="Contact">
+                        <a href={`tel:${person.phone}`}>{person.phone}</a>
+                        {person.email && <span class="sub">{person.email}</span>}
+                      </td>
+
+                      <td data-label="Branch">{branchLabel(person.branch)}</td>
+
+                      <td data-label="Party" class="num">
+                        {person.party_size}
+                        {person.guests_label && <span class="sub">{person.guests_label}</span>}
+                      </td>
+
+                      <td data-label="Bringing">
+                        {person.guest_names && person.guest_names.length > 0 ? (
+                          <ul class="guests">
+                            {person.guest_names.map((guest) => (
+                              <li>{guest}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span class="muted">—</span>
+                        )}
+                      </td>
+
+                      <td data-label="Nights">
+                        {person.days.length > 0 ? person.days.join(", ") : "—"}
+                      </td>
+
+                      <td data-label="Needs">
+                        {person.flags.length === 0 ? (
+                          <span class="muted">—</span>
+                        ) : (
+                          <span class="badges">
+                            {person.flags.map((flag) => (
+                              <span class:list={["badge", badgeClass[flag]]}>
+                                {badge[flag] ?? flag}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </td>
+
+                      <td data-label="Checked in">
+                        {person.attendedDays.length > 0 ? (
+                          <span class="badge badge--in">{person.attendedDays.join(", ")}</span>
+                        ) : (
+                          <span class="muted">Not yet</span>
+                        )}
+                      </td>
+
+                      <td data-label="Code">
+                        <a href={`/pass/${person.code}`}><code>{person.code}</code></a>
+                      </td>
+
+                      <td data-label="Signed up">
+                        {timeFormat.format(new Date(person.created_at))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )
+    )
+  }
+</Admin>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-4);
+  }
+
+  .page-head__title {
+    font-size: var(--text-lg);
+    font-weight: 800;
+    margin: var(--space-1) 0 0;
+  }
+
+  .eyebrow {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .shortcuts__label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .shortcut {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--text-muted);
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    padding: var(--space-2) var(--space-3);
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .shortcut:hover {
+    border-color: var(--color-info);
+    color: var(--color-info);
+  }
+
+  .shortcut--on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .shortcut--on:hover {
+    color: var(--on-accent);
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+
+  .badge--first {
+    color: var(--color-info);
+  }
+
+  .badge--children {
+    color: var(--color-success);
+  }
+
+  .badge--transport {
+    color: var(--color-warning);
+  }
+
+  .badge--access {
+    color: var(--color-danger);
+  }
+
+  .badge--in {
+    color: var(--color-success);
+  }
+
+  .muted {
+    color: var(--text-muted);
+  }
+
+  .guests {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .guests li {
+    font-size: var(--text-xs);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    margin: 0;
+  }
+
+  .notice {
+    background: var(--surface);
+    border: 1px solid var(--accent-deep);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+  }
+
+  .notice p {
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* Ten columns will never fit a phone. Below the table breakpoint the shared
+     stylesheet reflows each row into a card, so this only governs desktop. */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+</style>

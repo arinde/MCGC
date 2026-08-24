@@ -90,8 +90,23 @@ if (ready) {
       branch: string | null;
       code: string;
       party_size: number;
+      guest_names?: string[];
       checked_in: boolean;
     };
+
+    /**
+     * Everything below is written into innerHTML, and every value in a match
+     * came from a public form. A registration saved under the name
+     * `<img src=x onerror=...>` would otherwise run in the usher's signed-in
+     * admin session the moment anyone searched for it.
+     */
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 
     const render = (matches: Match[]) => {
       results.innerHTML = matches
@@ -99,8 +114,15 @@ if (ready) {
           (match) => `
         <li class="result${match.checked_in ? " result--done" : ""}">
           <div>
-            <p class="result__name">${match.name}</p>
-            <p class="result__meta">${match.phone}${match.branch ? " · " + match.branch : ""} · party of ${match.party_size} · <code>${match.code}</code></p>
+            <p class="result__name">${escapeHtml(match.name)}</p>
+            <p class="result__meta">${escapeHtml(match.phone)}${match.branch ? " · " + escapeHtml(match.branch) : ""} · party of ${match.party_size} · <code>${escapeHtml(match.code)}</code></p>
+            ${
+              match.guest_names?.length
+                ? `<p class="result__guests">With: ${match.guest_names
+                    .map((guest) => escapeHtml(guest))
+                    .join(", ")}</p>`
+                : ""
+            }
           </div>
           ${
             match.checked_in
@@ -305,6 +327,12 @@ if (ready) {
   .results :global(code) {
     color: var(--accent);
     letter-spacing: 0.08em;
+  }
+
+  .results :global(.result__guests) {
+    font-size: 0.8rem;
+    color: var(--text);
+    margin: 4px 0 0;
   }
 
   .results :global(.result__btn) {

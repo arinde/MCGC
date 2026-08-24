@@ -1,0 +1,179 @@
+---
+import { niceCeiling, axisTicks, seriesColor } from "../../lib/charts";
+
+/**
+ * Grouped vertical bar chart, rendered as SVG on the server.
+ *
+ * Used for night-by-night registered vs attended, and for the needs breakdown.
+ */
+
+export type BarGroup = {
+  label: string;
+  values: number[];
+};
+
+interface Props {
+  groups: BarGroup[];
+  /** One name per value in each group. Drives the legend and the colours. */
+  series: string[];
+  unit?: string;
+  /** Read out to screen readers in place of the bars. */
+  caption: string;
+}
+
+const { groups, series, unit = "people", caption } = Astro.props;
+
+const WIDTH = 720;
+const HEIGHT = 260;
+const PAD_LEFT = 36;
+const PAD_TOP = 8;
+const PAD_BOTTOM = 34;
+const PLOT_WIDTH = WIDTH - PAD_LEFT;
+const PLOT_HEIGHT = HEIGHT - PAD_BOTTOM - PAD_TOP;
+
+const max = niceCeiling(Math.max(0, ...groups.flatMap((group) => group.values)));
+const ticks = axisTicks(max, 4);
+
+const slotWidth = groups.length > 0 ? PLOT_WIDTH / groups.length : PLOT_WIDTH;
+// A quarter of each slot stays empty so neighbouring nights don't touch.
+const groupWidth = slotWidth * 0.74;
+const barWidth = series.length > 0 ? groupWidth / series.length : groupWidth;
+
+const gridLines = ticks.map((tick) => ({
+  value: tick,
+  y: PAD_TOP + PLOT_HEIGHT - (tick / max) * PLOT_HEIGHT,
+}));
+
+const bars = groups.flatMap((group, groupIndex) =>
+  group.values.map((value, seriesIndex) => {
+    // Zero still draws a 2px sliver, so an empty night reads as "none yet"
+    // rather than as a chart that failed to render.
+    const height = Math.max((value / max) * PLOT_HEIGHT, value > 0 ? 2 : 0);
+
+    return {
+      x: PAD_LEFT + groupIndex * slotWidth + (slotWidth - groupWidth) / 2 + seriesIndex * barWidth,
+      y: PAD_TOP + PLOT_HEIGHT - height,
+      height,
+      width: Math.max(barWidth - 3, 2),
+      color: seriesColor(seriesIndex),
+      label: `${group.label} · ${series[seriesIndex] ?? ""}: ${value} ${unit}`,
+      value,
+    };
+  }),
+);
+---
+
+{
+  groups.length === 0 ? (
+    <p class="empty">Nothing to chart yet.</p>
+  ) : (
+    <figure class="chart">
+      <div class="chart__scroll">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={caption} class="chart__svg">
+          {gridLines.map((grid) => (
+            <line x1={PAD_LEFT} x2={WIDTH} y1={grid.y} y2={grid.y} class="grid" />
+          ))}
+          {gridLines.map((grid) => (
+            <text x={PAD_LEFT - 10} y={grid.y + 4} class="axis" text-anchor="end">
+              {grid.value}
+            </text>
+          ))}
+
+          {bars.map((bar) => (
+            <rect
+              x={bar.x}
+              y={bar.y}
+              width={bar.width}
+              height={bar.height}
+              fill={bar.color}
+              rx="2"
+            >
+              <title>{bar.label}</title>
+            </rect>
+          ))}
+
+          {groups.map((group, index) => (
+            <text
+              x={PAD_LEFT + index * slotWidth + slotWidth / 2}
+              y={HEIGHT - 12}
+              class="axis"
+              text-anchor="middle"
+            >
+              {group.label}
+            </text>
+          ))}
+        </svg>
+      </div>
+
+      <figcaption class="legend">
+        {series.map((name, index) => (
+          <span class="legend__item">
+            <span class="legend__key" style={`background:${seriesColor(index)}`} />
+            {name}
+          </span>
+        ))}
+      </figcaption>
+    </figure>
+  )
+}
+
+<style>
+  .chart {
+    margin: 0;
+  }
+
+  /* The SVG scales uniformly so its labels keep their proportions. Below the
+     min-width that would shrink 11px text to the point of uselessness, the
+     chart scrolls sideways instead — the same bargain the data tables make. */
+  .chart__scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .chart__svg {
+    display: block;
+    width: 100%;
+    min-width: 480px;
+    height: auto;
+  }
+
+  .grid {
+    stroke: var(--rule);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .axis {
+    fill: var(--text-muted);
+    font-size: 11px;
+    font-family: var(--font-body);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .legend__key {
+    width: 14px;
+    height: 8px;
+    border-radius: 999px;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+</style>

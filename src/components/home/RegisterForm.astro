@@ -1,4 +1,5 @@
 ---
+import BranchField from "../BranchField.astro";
 import { convention } from "../../data/convention";
 import Button from "../Button.astro";
 
@@ -42,10 +43,7 @@ const noteOptions = [
   </div>
 
   <div class="field-row">
-    <div class="field">
-      <label for="f-branch">Branch / church</label>
-      <input type="text" id="f-branch" name="branch" placeholder="e.g. Headquarters" autocomplete="organization" />
-    </div>
+    <BranchField id="f-branch" label="Branch / church" />
     <div class="field">
       <label for="f-guests">Coming with how many?</label>
       <select id="f-guests" name="guestsLabel">
@@ -56,6 +54,19 @@ const noteOptions = [
         <option value="Me + 4 or more">Me + 4 or more</option>
       </select>
     </div>
+  </div>
+
+  <div class="field" id="f-guest-names-field" hidden>
+    <label for="f-guest-names">Who are you bringing?</label>
+    <textarea
+      id="f-guest-names"
+      name="guestNames"
+      rows="3"
+      placeholder="One name per line"
+      autocomplete="off"></textarea>
+    <p class="field__hint" id="f-guest-names-hint">
+      It helps us seat you together and speeds you through the gate.
+    </p>
   </div>
 
   <fieldset class="field">
@@ -135,6 +146,31 @@ const noteOptions = [
       confirmBox.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
+    // Asking "who are you bringing?" of someone coming alone is noise, so the
+    // field only appears once they say they're bringing someone, and the hint
+    // names the number they picked.
+    const guestsSelect = document.getElementById("f-guests") as HTMLSelectElement | null;
+    const guestNamesField = document.getElementById("f-guest-names-field");
+    const guestNamesHint = document.getElementById("f-guest-names-hint");
+
+    const syncGuestNames = () => {
+      if (!guestsSelect || !guestNamesField) return;
+
+      const guests = Number(guestsSelect.value.match(/\d+/)?.[0] ?? 0);
+      guestNamesField.hidden = guests === 0;
+
+      if (guestNamesHint) {
+        const isOpenEnded = /or more/i.test(guestsSelect.value);
+        guestNamesHint.textContent = isOpenEnded
+          ? "List everyone coming with you, one name per line. It speeds you through the gate."
+          : `List the ${guests === 1 ? "person" : `${guests} people`} coming with you, one name ` +
+            "per line. It speeds you through the gate.";
+      }
+    };
+
+    guestsSelect?.addEventListener("change", syncGuestNames);
+    syncGuestNames();
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
@@ -144,7 +180,9 @@ const noteOptions = [
         phone: String(formData.get("phone") ?? ""),
         email: String(formData.get("email") ?? ""),
         branch: String(formData.get("branch") ?? ""),
+        branchOther: String(formData.get("branchOther") ?? ""),
         guestsLabel: String(formData.get("guestsLabel") ?? ""),
+        guestNames: String(formData.get("guestNames") ?? ""),
         days: formData.getAll("days").map(String),
         flags: formData.getAll("flags").map(String),
       };
@@ -212,6 +250,18 @@ const noteOptions = [
     padding: 0;
   }
 
+  .field textarea {
+    resize: vertical;
+    min-height: 88px;
+    line-height: 1.5;
+  }
+
+  .field__hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: var(--space-2) 0 0;
+  }
+
   .field__optional {
     text-transform: none;
     letter-spacing: 0;
@@ -219,7 +269,8 @@ const noteOptions = [
   }
 
   .field input,
-  .field select {
+  .field select,
+  .field textarea {
     width: 100%;
     background: var(--surface-raised);
     border: 1px solid var(--rule-strong);
@@ -232,12 +283,14 @@ const noteOptions = [
   }
 
   .field input:focus,
-  .field select:focus {
+  .field select:focus,
+  .field textarea:focus {
     border-color: var(--accent);
     outline: none;
   }
 
-  .field input::placeholder {
+  .field input::placeholder,
+  .field textarea::placeholder {
     color: var(--text-muted);
   }
 

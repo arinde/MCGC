@@ -206,6 +206,20 @@ export const campChecklist = [
   },
 ] as const;
 
+/**
+ * The branches people can pick on the registration and volunteer forms.
+ *
+ * These are the STORED values — the dashboard groups by them, so renaming one
+ * after go-live orphans every row that carries it. Add to the end instead.
+ *
+ * "Other" is not in this list: it is offered by the form as an escape hatch
+ * and stores whatever the person types, so a visitor from another church can
+ * say where they've come from.
+ */
+export const branches = ["Igbe HQ", "Ayetoro", "Ikorodu", "Weighbridge"] as const;
+
+export type Branch = (typeof branches)[number];
+
 export type Convention = typeof convention;
 
 /** Day labels, for the form, the dashboard and check-in. */

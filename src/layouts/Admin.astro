@@ -5,13 +5,14 @@ import "../styles/table.css";
 
 interface Props {
   title: string;
-  active: "overview" | "scan" | "checkin" | "counts" | "volunteers";
+  active: "overview" | "people" | "scan" | "checkin" | "counts" | "volunteers";
 }
 
 const { title, active } = Astro.props;
 
 const tabs = [
   { key: "overview", href: "/admin", label: "Overview" },
+  { key: "people", href: "/admin/people", label: "Register" },
   { key: "scan", href: "/admin/scan", label: "Scan" },
   { key: "checkin", href: "/admin/checkin", label: "Search" },
   { key: "counts", href: "/admin/counts", label: "Headcounts" },

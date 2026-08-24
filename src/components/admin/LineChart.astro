@@ -1,0 +1,139 @@
+---
+import { buildLine, niceCeiling, axisTicks, seriesColor } from "../../lib/charts";
+
+/**
+ * Line chart with a soft fill, rendered as SVG on the server.
+ *
+ * Used for the registration curve over time and for gate flow by the hour —
+ * both questions about shape rather than exact values, which is what a line
+ * answers better than a table.
+ */
+
+interface Props {
+  labels: string[];
+  values: number[];
+  unit?: string;
+  caption: string;
+  /** Marks the last point with a dot and its value. */
+  highlightLast?: boolean;
+}
+
+const { labels, values, unit = "people", caption, highlightLast = true } = Astro.props;
+
+const WIDTH = 720;
+const HEIGHT = 240;
+const PAD_LEFT = 36;
+const PAD_TOP = 12;
+const PAD_BOTTOM = 30;
+const PLOT_WIDTH = WIDTH - PAD_LEFT - 10;
+const PLOT_HEIGHT = HEIGHT - PAD_TOP - PAD_BOTTOM;
+
+const max = niceCeiling(Math.max(0, ...values));
+const ticks = axisTicks(max, 4);
+const { line, area, points } = buildLine(values, PLOT_WIDTH, PLOT_HEIGHT, max);
+
+const gridLines = ticks.map((tick) => ({
+  value: tick,
+  y: PAD_TOP + PLOT_HEIGHT - (tick / max) * PLOT_HEIGHT,
+}));
+
+/**
+ * With a month of daily points there is no room for a label under each one.
+ * Showing roughly six, evenly spaced, keeps the axis readable at any length.
+ */
+const labelStep = Math.max(1, Math.ceil(labels.length / 6));
+const axisLabels = points
+  .map((point, index) => ({ ...point, text: labels[index] ?? "", index }))
+  .filter((point) => point.index % labelStep === 0 || point.index === points.length - 1);
+
+const last = points[points.length - 1];
+const stroke = seriesColor(0);
+---
+
+{
+  points.length === 0 ? (
+    <p class="empty">Nothing to chart yet.</p>
+  ) : (
+    <figure class="chart">
+      <div class="chart__scroll">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={caption} class="chart__svg">
+          <defs>
+            <linearGradient id="line-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color={stroke} stop-opacity="0.28" />
+              <stop offset="100%" stop-color={stroke} stop-opacity="0" />
+            </linearGradient>
+          </defs>
+
+          {gridLines.map((grid) => (
+            <line x1={PAD_LEFT} x2={WIDTH - 10} y1={grid.y} y2={grid.y} class="grid" />
+          ))}
+          {gridLines.map((grid) => (
+            <text x={PAD_LEFT - 10} y={grid.y + 4} class="axis" text-anchor="end">
+              {grid.value}
+            </text>
+          ))}
+
+          <g transform={`translate(${PAD_LEFT} ${PAD_TOP})`}>
+            <path d={area} fill="url(#line-fill)" />
+            <path d={line} fill="none" stroke={stroke} stroke-width="2.5" stroke-linejoin="round"
+              stroke-linecap="round" vector-effect="non-scaling-stroke" />
+
+            {points.map((point, index) => (
+              <circle cx={point.x} cy={point.y} r="9" fill="transparent">
+                <title>{labels[index]}: {point.value} {unit}</title>
+              </circle>
+            ))}
+
+            {highlightLast && last && (
+              <circle cx={last.x} cy={last.y} r="4" fill={stroke} stroke="var(--surface)"
+                stroke-width="2" />
+            )}
+          </g>
+
+          {axisLabels.map((point) => (
+            <text x={PAD_LEFT + point.x} y={HEIGHT - 10} class="axis" text-anchor="middle">
+              {point.text}
+            </text>
+          ))}
+        </svg>
+      </div>
+    </figure>
+  )
+}
+
+<style>
+  .chart {
+    margin: 0;
+  }
+
+  .chart__scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .chart__svg {
+    display: block;
+    width: 100%;
+    min-width: 480px;
+    height: auto;
+  }
+
+  .grid {
+    stroke: var(--rule);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .axis {
+    fill: var(--text-muted);
+    font-size: 11px;
+    font-family: var(--font-body);
+  }
+
+  .empty {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+</style>

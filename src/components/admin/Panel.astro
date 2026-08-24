@@ -1,0 +1,66 @@
+---
+interface Props {
+  title: string;
+  /** One line under the title saying what the panel is for. */
+  hint?: string;
+  /** Spans both columns in a two-column grid. */
+  wide?: boolean;
+}
+
+const { title, hint, wide = false } = Astro.props;
+---
+
+<section class:list={["panel", wide && "panel--wide"]}>
+  <header class="panel__head">
+    <div>
+      <h2 class="panel__title">{title}</h2>
+      {hint && <p class="panel__hint">{hint}</p>}
+    </div>
+    <slot name="action" />
+  </header>
+
+  <slot />
+</section>
+
+<style>
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    min-width: 0;
+  }
+
+  .panel--wide {
+    grid-column: 1 / -1;
+  }
+
+  .panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .panel__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .panel__hint {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin: var(--space-1) 0 0;
+    max-width: 46ch;
+  }
+
+  @media (min-width: 760px) {
+    .panel {
+      padding: var(--space-6);
+    }
+  }
+</style>

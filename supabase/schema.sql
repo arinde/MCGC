@@ -1,7 +1,12 @@
 -- =====================================================================
 --  MCGC Convention — database schema
---  Run this once in Supabase: Dashboard → SQL Editor → New query → Run.
---  Safe to re-run; it drops and recreates cleanly.
+--  Run in Supabase: Dashboard → SQL Editor → New query → Run.
+--
+--  Safe to re-run at any time, including on a live database mid-convention.
+--  Nothing here drops, deletes or truncates: every table and index is
+--  `if not exists`, every view is `create or replace`, and new columns are
+--  `add column if not exists`. Re-running adds whatever is missing and leaves
+--  existing rows untouched.
 -- =====================================================================
 
 -- ---------- registrations ----------
@@ -166,3 +171,13 @@ cross  join lateral unnest(v.teams) as t(team)
 where  v.status <> 'declined'
 group  by t.team
 order  by people desc;
+
+-- =====================================================================
+--  Guest names
+--  Who each person is bringing, so ushers can seat a family together and
+--  the gate knows how many to expect under one code.
+--  Added after launch — running this block on an existing database adds
+--  just the new column and leaves every existing row intact.
+-- =====================================================================
+alter table registrations
+  add column if not exists guest_names text[] not null default '{}';

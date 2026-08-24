@@ -1,4 +1,5 @@
 ---
+import BranchField from "../components/BranchField.astro";
 import Base from "../layouts/Base.astro";
 import SiteNav from "../components/home/SiteNav.astro";
 import SiteFooter from "../components/home/SiteFooter.astro";
@@ -73,10 +74,7 @@ const { days, title, year } = convention;
             </div>
           </div>
 
-          <div class="field">
-            <label for="v-branch">Branch / church</label>
-            <input type="text" id="v-branch" name="branch" autocomplete="organization" />
-          </div>
+          <BranchField id="v-branch" label="Branch / church" />
 
           <fieldset class="field">
             <legend>Which team would you like to serve on?</legend>
@@ -150,6 +148,7 @@ const { days, title, year } = convention;
         phone: String(data.get("phone") ?? ""),
         email: String(data.get("email") ?? ""),
         branch: String(data.get("branch") ?? ""),
+        branchOther: String(data.get("branchOther") ?? ""),
         experience: String(data.get("experience") ?? ""),
         teams: data.getAll("teams").map(String),
         days: data.getAll("days").map(String),

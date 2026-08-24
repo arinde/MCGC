@@ -2,7 +2,14 @@
 import Admin from "../../layouts/Admin.astro";
 import StatTile from "../../components/admin/StatTile.astro";
 import DayTable from "../../components/admin/DayTable.astro";
+import Panel from "../../components/admin/Panel.astro";
+import LineChart from "../../components/admin/LineChart.astro";
+import BarChart from "../../components/admin/BarChart.astro";
+import DonutChart from "../../components/admin/DonutChart.astro";
+import NeedsPanel from "../../components/admin/NeedsPanel.astro";
+import ActivityFeed from "../../components/admin/ActivityFeed.astro";
 import { loadDashboard, type DashboardData } from "../../lib/stats";
+import { teamName } from "../../lib/volunteers";
 import { isConfigured } from "../../lib/supabase";
 
 // Live figures — never prerender.
@@ -22,27 +29,14 @@ if (!isConfigured()) {
   }
 }
 
-const exportLists = [
-  { filter: "all", label: "Everyone" },
-  { filter: "First-time guest", label: "First-timers" },
-  { filter: "Bringing children", label: "Bringing children" },
-  { filter: "Needs transport", label: "Need transport" },
-  { filter: "Accessible seating", label: "Accessible seating" },
-];
-
-const timeFormat = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const decimal = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 });
 ---
 
 <Admin title="Overview" active="overview">
   {
     loadError ? (
       <div class="notice">
-        <h1 class="display notice__title">Not connected yet</h1>
+        <h1 class="notice__title">Not connected yet</h1>
         <p>{loadError}</p>
         <p class="notice__hint">See <code>README.md</code> → “Setting up the database”.</p>
       </div>
@@ -52,10 +46,11 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
           <div class="page-head">
             <div>
               <p class="eyebrow">Live</p>
-              <h1 class="display page-head__title">Registrations</h1>
+              <h1 class="page-head__title">Convention overview</h1>
             </div>
             <p class="page-head__meta">
-              {data.totals.registeredToday} today · refreshes every 30s
+              <span class="dot" aria-hidden="true" />
+              {data.totals.registeredToday} signed up today · refreshes every 30s
             </p>
           </div>
 
@@ -63,53 +58,124 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
             <StatTile
               label="People expected"
               value={data.totals.people}
-              detail={`${data.totals.parties} bookings`}
+              detail={`across ${data.totals.parties} bookings`}
               feature
             />
-            <StatTile label="First-timers" value={data.totals.firstTimers} detail="Follow-up list" />
-            <StatTile label="Bringing children" value={data.totals.withChildren} detail="For children's church" />
-            <StatTile label="Need transport" value={data.totals.needTransport} detail="For the shuttle team" />
+            <StatTile
+              label="Checked in"
+              value={data.totals.checkedInTotal}
+              detail="all nights so far"
+            />
+            <StatTile
+              label="Average party"
+              value={decimal.format(data.totals.averageParty)}
+              detail="people per booking"
+            />
+            <StatTile
+              label="Busiest night"
+              value={data.totals.peakNight?.label ?? "—"}
+              detail={`${data.totals.peakNight?.registeredPeople ?? 0} expected`}
+            />
+            <StatTile
+              label="This week"
+              value={data.totals.registeredThisWeek}
+              detail="new bookings"
+            />
+            <StatTile label="Branches" value={data.totals.branchCount} detail="represented" />
+            <StatTile
+              label="Volunteers"
+              value={data.volunteers.total}
+              detail={`${data.volunteers.byTeam.length} teams covered`}
+            />
+            <StatTile
+              label="First-timers"
+              value={data.totals.firstTimers}
+              detail="for follow-up"
+            />
           </div>
 
-          <div class="columns">
+          <div class="grid">
+            <Panel
+              title="How sign-ups have built"
+              hint="Total people expected, accumulating day by day. A flat stretch means a quiet week."
+              wide
+            >
+              <LineChart
+                labels={data.timeline.map((point) => point.label)}
+                values={data.timeline.map((point) => point.cumulativePeople)}
+                caption="Cumulative people expected, by the day they registered"
+              />
+            </Panel>
+
+            <Panel
+              title="Registered against actual"
+              hint="What each night was promised, next to who really walked through the gate."
+              wide
+            >
+              <BarChart
+                groups={data.days.map((day) => ({
+                  label: day.label.replace("Day ", "D"),
+                  values: [day.registeredPeople, day.attendedPeople],
+                }))}
+                series={["Registered", "Attended"]}
+                caption="People registered and people checked in, for each night of the convention"
+              />
+            </Panel>
+
+            <NeedsPanel flags={data.flags} totalParties={data.totals.parties} />
+
+            <Panel title="Party sizes" hint="How many people arrive together.">
+              <DonutChart
+                slices={data.partySizes}
+                totalLabel="bookings"
+                caption="Bookings split by how many people are in the party"
+              />
+            </Panel>
+
+            <Panel title="Where they're coming from" hint="Top branches by people expected.">
+              <DonutChart
+                slices={data.branches.map((branch) => ({
+                  label: branch.branch,
+                  value: branch.people,
+                  href: `/admin/people?branch=${encodeURIComponent(branch.branch)}`,
+                }))}
+                totalLabel="people"
+                caption="People expected, split by branch"
+              />
+            </Panel>
+
+            <Panel title="Volunteer teams" hint="Sign-ups per team. Click a team to see the names.">
+              <DonutChart
+                slices={data.volunteers.byTeam.map((team) => ({
+                  label: teamName(team.label),
+                  value: team.value,
+                  href: `/admin/volunteers?team=${encodeURIComponent(team.label)}`,
+                }))}
+                totalLabel="volunteers"
+                caption="Volunteers signed up, split by team"
+              />
+            </Panel>
+
+            {data.checkinFlow.points.length > 0 && (
+              <Panel
+                title={`Gate flow — ${data.checkinFlow.day}`}
+                hint="People checked in each hour on the busiest night. This is how you staff the gate."
+                wide
+              >
+                <LineChart
+                  labels={data.checkinFlow.points.map((point) => point.label)}
+                  values={data.checkinFlow.points.map((point) => point.people)}
+                  caption={`People checked in per hour on ${data.checkinFlow.day}`}
+                />
+              </Panel>
+            )}
+          </div>
+
+          <div class="stack">
             <DayTable days={data.days} />
 
-            <div class="panel">
-              <h2 class="panel__title">By branch</h2>
-              {data.branches.length === 0 ? (
-                <p class="empty">No registrations yet.</p>
-              ) : (
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Branch</th>
-                      <th scope="col" class="num">People</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.branches.map((branch) => (
-                      <tr>
-                        <th scope="row">{branch.branch}</th>
-                        <td data-label="People" class="num">{branch.people}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel__head">
-              <h2 class="panel__title">Latest registrations</h2>
-              <div class="exports">
-                {exportLists.map((list) => (
-                  <a class="export" href={`/admin/export.csv?filter=${encodeURIComponent(list.filter)}`}>
-                    {list.label}
-                  </a>
-                ))}
-              </div>
-            </div>
+            <Panel title="Latest registrations" hint="The twelve most recent. The register has everyone.">
+            <a slot="action" class="action" href="/admin/people">Open the register →</a>
 
             {data.recent.length === 0 ? (
               <p class="empty">Nothing yet — the first registration will appear here.</p>
@@ -124,7 +190,6 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
                       <th scope="col" class="num">Party</th>
                       <th scope="col">Nights</th>
                       <th scope="col">Code</th>
-                      <th scope="col">When</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -133,7 +198,7 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
                         <th scope="row">
                           {registration.name}
                           {registration.flags.length > 0 && (
-                            <span class="sub flags">{registration.flags.join(" · ")}</span>
+                            <span class="sub">{registration.flags.join(" · ")}</span>
                           )}
                         </th>
                         <td data-label="Phone">
@@ -143,32 +208,15 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
                         <td data-label="Party" class="num">{registration.party_size}</td>
                         <td data-label="Nights">{registration.days.join(", ") || "—"}</td>
                         <td data-label="Code"><code>{registration.code}</code></td>
-                        <td data-label="When">{timeFormat.format(new Date(registration.created_at))}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </div>
+          </Panel>
 
-          <div class="panel">
-            <h2 class="panel__title">Activity</h2>
-            {data.activity.length === 0 ? (
-              <p class="empty">No activity recorded yet.</p>
-            ) : (
-              <ul class="activity">
-                {data.activity.map((entry) => (
-                  <li>
-                    <span class:list={["activity__kind", `activity__kind--${entry.kind}`]}>
-                      {entry.kind}
-                    </span>
-                    <span class="activity__text">{entry.summary}</span>
-                    <time>{timeFormat.format(new Date(entry.created_at))}</time>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ActivityFeed activity={data.activity} />
           </div>
         </>
       )
@@ -198,171 +246,108 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 26px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+
+  .eyebrow {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0;
   }
 
   .page-head__title {
     font-size: var(--text-lg);
-    font-weight: 700;
-    margin-top: var(--space-1);
+    font-weight: 800;
+    margin: var(--space-1) 0 0;
   }
 
   .page-head__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
     font-size: 0.8rem;
     color: var(--text-muted);
     margin: 0;
   }
 
-  .tiles {
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    margin-bottom: 22px;
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-success);
+    animation: pulse 2.4s var(--ease) infinite;
   }
 
-  .columns {
-    display: grid;
-    gap: 22px;
-    margin-bottom: 22px;
-  }
-
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-    margin-bottom: var(--space-4);
-  }
-
-  @media (min-width: 760px) {
-    .panel {
-      padding: var(--space-6);
-      margin-bottom: var(--space-6);
+  @keyframes pulse {
+    50% {
+      opacity: 0.25;
     }
   }
 
-  .panel__head {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      animation: none;
+    }
   }
 
-  .panel__title {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 900;
-    margin: 0 0 18px;
+  .tiles {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin-bottom: var(--space-6);
   }
 
-  .panel__head .panel__title {
-    margin: 0;
+  .grid {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
   }
 
-  .exports {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  @media (min-width: 900px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
   }
 
-  .export {
-    font-size: 0.74rem;
+  /* DayTable and the panels beneath it each own their internal padding, so
+     the rhythm between them comes from one gap rather than stacked margins. */
+  .stack {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 900px) {
+    .stack {
+      gap: var(--space-6);
+    }
+  }
+
+  .action {
+    font-size: var(--text-xs);
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--color-info);
     text-decoration: none;
-    border: 1px solid var(--rule-strong);
-    padding: 6px 12px;
-    border-radius: 999px;
-    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
   }
 
-  .export:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+  .action:hover {
+    text-decoration: underline;
   }
 
-  /* The registrations table has seven columns and will never fit a phone.
-     Scroll it, and fade the right edge so it's obvious there is more. */
   .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    mask-image: linear-gradient(to right, #000 92%, transparent 100%);
-  }
-
-  @media (min-width: 900px) {
-    .table-scroll {
-      mask-image: none;
-    }
-  }
-
-  .activity {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 2px;
-  }
-
-  .activity li {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    row-gap: var(--space-1);
-    gap: 12px;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--rule);
-    font-size: 0.86rem;
-  }
-
-  .activity__kind {
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    border: 1px solid var(--rule-strong);
-    color: var(--text-muted);
-    padding: 3px 8px;
-    border-radius: 999px;
-  }
-
-  .activity__kind--registration {
-    color: var(--accent);
-    border-color: var(--accent-deep);
-  }
-
-  .activity__kind--checkin {
-    color: var(--color-success);
-    border-color: var(--color-success);
-  }
-
-  .activity__text {
-    color: var(--text);
-  }
-
-  .activity time {
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-    white-space: nowrap;
-    grid-column: 2;
-  }
-
-  @media (min-width: 640px) {
-    .activity li {
-      grid-template-columns: auto 1fr auto;
-    }
-
-    .activity time {
-      grid-column: auto;
-    }
   }
 
   .empty {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
     margin: 0;
   }
 
@@ -370,33 +355,22 @@ const timeFormat = new Intl.DateTimeFormat("en-GB", {
     background: var(--surface);
     border: 1px solid var(--accent-deep);
     border-radius: var(--radius-md);
-    padding: 30px;
+    padding: var(--space-8);
     max-width: 60ch;
   }
 
   .notice__title {
-    font-size: 1.8rem;
-    margin-bottom: 12px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 var(--space-3);
   }
 
   .notice p {
     color: var(--text-muted);
-    margin: 0 0 8px;
+    margin: 0 0 var(--space-2);
   }
 
   .notice__hint {
     font-size: 0.86rem;
-    color: var(--text-muted) !important;
-  }
-
-  @media (min-width: 900px) {
-    .columns {
-      grid-template-columns: 1.4fr 1fr;
-      align-items: start;
-    }
-
-    .columns > :global(.panel) {
-      margin-bottom: 0;
-    }
   }
 </style>

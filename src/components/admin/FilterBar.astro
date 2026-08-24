@@ -1,0 +1,283 @@
+---
+import { FLAGS } from "../../lib/stats";
+import { dayLabels } from "../../data/convention";
+import { hasFilters, type PeopleFilters } from "../../lib/people";
+
+/**
+ * The filter bar above the register.
+ *
+ * A plain GET form: every filter ends up in the URL, so a state can be
+ * bookmarked, shared with the transport team, or reloaded at the gate without
+ * a byte of JavaScript. The submit button is there for keyboards and for
+ * browsers where the auto-submit script hasn't run.
+ */
+
+interface Props {
+  filters: PeopleFilters;
+  branches: string[];
+  matchedParties: number;
+  matchedPeople: number;
+  totalParties: number;
+  /** Carries the current filters into the CSV export. */
+  exportHref: string;
+}
+
+const { filters, branches, matchedParties, matchedPeople, totalParties, exportHref } = Astro.props;
+
+const showing = hasFilters(filters);
+
+const sorts = [
+  { value: "recent", label: "Most recent" },
+  { value: "name", label: "Name A–Z" },
+  { value: "party", label: "Biggest party" },
+  { value: "branch", label: "Branch" },
+];
+---
+
+<form class="filters" method="GET" action="/admin/people" role="search">
+  <div class="filters__row">
+    <label class="field field--grow">
+      <span class="field__label">Search</span>
+      <input
+        type="search"
+        name="q"
+        value={filters.search}
+        placeholder="Name, phone, email or code"
+        autocomplete="off"
+      />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Need</span>
+      <select name="flag">
+        <option value="">Any need</option>
+        {
+          FLAGS.map((flag) => (
+            <option value={flag.id} selected={filters.flag === flag.id}>
+              {flag.label}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Night</span>
+      <select name="day">
+        <option value="">Any night</option>
+        {
+          dayLabels.map((day) => (
+            <option value={day} selected={filters.day === day}>
+              {day}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Branch</span>
+      <select name="branch">
+        <option value="">All branches</option>
+        {
+          branches.map((branch) => (
+            <option value={branch} selected={filters.branch === branch}>
+              {branch}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Attendance</span>
+      <select name="attendance">
+        <option value="">Everyone</option>
+        <option value="checked-in" selected={filters.attendance === "checked-in"}>
+          Has checked in
+        </option>
+        <option value="not-checked-in" selected={filters.attendance === "not-checked-in"}>
+          Not yet checked in
+        </option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Sort</span>
+      <select name="sort">
+        {
+          sorts.map((sort) => (
+            <option value={sort.value} selected={filters.sort === sort.value}>
+              {sort.label}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+  </div>
+
+  <div class="filters__foot">
+    <p class="filters__count">
+      <strong>{matchedParties}</strong> {matchedParties === 1 ? "booking" : "bookings"}
+      <span class="filters__sub">
+        {" · "}
+        {matchedPeople} {matchedPeople === 1 ? "person" : "people"}
+      </span>
+      {showing && <span class="filters__sub">{" · "}filtered from {totalParties}</span>}
+    </p>
+
+    <div class="filters__actions">
+      <button type="submit" class="chip chip--go">Apply</button>
+      {
+        showing && (
+          <a href="/admin/people" class="chip">
+            Clear
+          </a>
+        )
+      }
+      <a href={exportHref} class="chip chip--export">Export this list</a>
+    </div>
+  </div>
+</form>
+
+<script>
+  // Changing a dropdown submits immediately — at the gate nobody wants to pick
+  // a filter and then hunt for a button. The text input is left alone so
+  // typing a name doesn't reload on every keystroke.
+  const form = document.querySelector<HTMLFormElement>(".filters");
+
+  form?.querySelectorAll("select").forEach((select) => {
+    select.addEventListener("change", () => form.submit());
+  });
+</script>
+
+<style>
+  .filters {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .filters__row {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .field {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .field--grow {
+    grid-column: 1 / -1;
+  }
+
+  .field__label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .field input,
+  .field select {
+    font-family: inherit;
+    font-size: var(--text-sm);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .field input:focus-visible,
+  .field select:focus-visible {
+    outline: 2px solid var(--color-info);
+    outline-offset: 1px;
+  }
+
+  .filters__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--rule);
+  }
+
+  .filters__count {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .filters__count strong {
+    color: var(--text);
+    font-size: var(--text-base);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .filters__sub {
+    color: var(--text-muted);
+  }
+
+  .filters__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .chip {
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: none;
+    text-decoration: none;
+    border: 1px solid var(--rule-strong);
+    padding: var(--space-2) var(--space-4);
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+  }
+
+  .chip:hover {
+    border-color: var(--text-muted);
+    color: var(--text);
+  }
+
+  .chip--go {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .chip--go:hover {
+    color: var(--on-accent);
+  }
+
+  .chip--export {
+    border-color: var(--color-info);
+    color: var(--color-info);
+  }
+
+  @media (min-width: 760px) {
+    .field--grow {
+      grid-column: span 2;
+    }
+  }
+</style>

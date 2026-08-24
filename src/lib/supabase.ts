@@ -50,6 +50,8 @@ export type Registration = {
   party_size: number;
   days: string[];
   flags: string[];
+  /** Names of the people they're bringing. Absent on databases that predate the column. */
+  guest_names?: string[];
   source: string | null;
   notes: string | null;
   created_at: string;
